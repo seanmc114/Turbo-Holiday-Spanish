@@ -1,0 +1,1375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Turbo Holiday">
+<meta name="theme-color" content="#e07b00">
+<title>Turbo Holiday</title>
+<style>
+/* System font fallbacks — work offline and when shared as a file */
+:root{
+  --font-display: 'Boogaloo', 'Arial Rounded MT Bold', 'Trebuchet MS', system-ui, sans-serif;
+  --font-body:    'Nunito', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-hand:    'Caveat', 'Bradley Hand', cursive;
+}
+</style>
+<script>
+// Load Google Fonts async — works online, fails silently offline
+(function(){
+  var l=document.createElement('link');
+  l.rel='stylesheet';
+  l.href='https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;700;800;900&family=Caveat:wght@600;700&display=swap';
+  document.head.appendChild(l);
+})();
+</script>
+<style>
+:root{
+  --sun:#f5a623;--sun-deep:#e07b00;--terra:#c94f2c;--sky:#4ab8f5;
+  --sea:#1a9e8f;--blue:#1a47b8;--sand:#fff9ef;--ink:#1c1208;
+  --muted:#7a6a58;--shadow:rgba(28,18,8,0.10);--green:#22c55e;--red:#e03c2c;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--sand);color:var(--ink);font-family:var(--font-body);overscroll-behavior:none;}
+
+/* ── ATMOSPHERE ── */
+.sky-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,#87ceeb 0%,#b8e4f7 30%,#d8eefa 55%,#fff9ef 100%);}
+.sun-orb{position:fixed;top:calc(-55px + var(--safe-top));right:-35px;width:200px;height:200px;border-radius:50%;z-index:0;pointer-events:none;background:radial-gradient(circle at 38% 38%,#ffe877,#f5a623 55%,#e07b00);box-shadow:0 0 0 28px rgba(245,166,35,0.09),0 0 0 60px rgba(245,166,35,0.05);animation:sunpulse 5s ease-in-out infinite;}
+@keyframes sunpulse{0%,100%{box-shadow:0 0 0 28px rgba(245,166,35,0.09),0 0 0 60px rgba(245,166,35,0.05);}50%{box-shadow:0 0 0 40px rgba(245,166,35,0.13),0 0 0 85px rgba(245,166,35,0.07);}}
+.waves{position:fixed;bottom:0;left:0;right:0;height:80px;z-index:0;pointer-events:none;overflow:hidden;}
+.waves svg{position:absolute;bottom:0;width:200%;animation:waveDrift 10s linear infinite;}
+.waves svg:nth-child(2){animation-duration:14s;animation-delay:-5s;opacity:0.5;}
+@keyframes waveDrift{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.clouds{position:fixed;top:0;left:0;right:0;height:220px;z-index:0;pointer-events:none;overflow:hidden;}
+.cloud{position:absolute;background:white;border-radius:50px;opacity:0.8;animation:drift linear infinite;}
+.cloud::before,.cloud::after{content:'';position:absolute;background:white;border-radius:50%;}
+.c1{width:110px;height:32px;top:28px;animation-duration:70s;animation-delay:-5s;}.c1::before{width:52px;height:48px;top:-25px;left:14px;}.c1::after{width:40px;height:36px;top:-17px;left:50px;}
+.c2{width:80px;height:24px;top:68px;animation-duration:90s;animation-delay:-40s;opacity:0.55;}.c2::before{width:38px;height:34px;top:-18px;left:10px;}.c2::after{width:30px;height:26px;top:-13px;left:34px;}
+.c3{width:130px;height:36px;top:12px;animation-duration:115s;animation-delay:-65s;opacity:0.6;}.c3::before{width:62px;height:54px;top:-28px;left:18px;}.c3::after{width:48px;height:42px;top:-20px;left:62px;}
+@keyframes drift{from{transform:translateX(-220px);}to{transform:translateX(calc(100vw + 220px));}}
+
+/* ── APP SHELL ── */
+.app-shell{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ── APP HEADER ── */
+.app-header{
+  padding: calc(var(--safe-top) + 14px) 20px 12px;
+  text-align:center;flex-shrink:0;
+  background:linear-gradient(180deg,rgba(135,206,235,0.6) 0%,transparent 100%);
+}
+.brand-turbo{font-family:var(--font-display);font-size:clamp(40px,11vw,54px);line-height:0.85;color:var(--sun-deep);-webkit-text-stroke:2px var(--terra);text-shadow:4px 4px 0 rgba(201,79,44,0.18);display:block;}
+.brand-holiday{font-family:var(--font-display);font-size:clamp(28px,8vw,38px);line-height:0.88;color:var(--blue);-webkit-text-stroke:1.5px var(--ink);text-shadow:3px 3px 0 rgba(28,18,8,0.10);display:block;}
+.tagline{font-family:var(--font-hand);font-size:16px;color:var(--muted);font-weight:600;margin-top:5px;display:block;}
+
+/* ── SCROLLABLE CONTENT ── */
+.app-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 16px calc(var(--safe-bot) + 80px);}
+
+/* ── SECTION HEADERS ── */
+.section-head{display:flex;align-items:center;gap:10px;margin:20px 0 10px;}
+.section-head-label{font-size:10px;font-weight:900;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.section-head::after{content:'';flex:1;height:2px;background:linear-gradient(to right,rgba(26,71,184,0.15),transparent);border-radius:2px;}
+
+/* ── LEVEL CARDS ── */
+.level-card{
+  background:white;border-radius:18px;border:none;text-align:left;
+  cursor:pointer;width:100%;padding:0;overflow:hidden;
+  box-shadow:0 4px 16px var(--shadow);
+  transition:transform 0.13s,box-shadow 0.15s;
+  margin-bottom:10px;display:block;
+  -webkit-appearance:none;
+}
+.level-card:active{transform:scale(0.975);box-shadow:0 2px 8px var(--shadow);}
+.level-card.locked{opacity:0.68;}
+.card-stripe{height:5px;}
+.card-body{padding:13px 15px;display:flex;align-items:center;gap:13px;}
+.card-emoji{font-size:1.9rem;flex-shrink:0;line-height:1;}
+.card-info{flex:1;min-width:0;}
+.card-name{font-family:var(--font-display);font-size:1.12rem;color:var(--ink);line-height:1.1;}
+.card-sub{font-size:0.69rem;color:var(--muted);font-weight:700;margin-top:2px;line-height:1.3;}
+.card-best{font-size:0.75rem;font-weight:800;color:var(--blue);margin-top:5px;display:flex;align-items:center;gap:4px;}
+.card-best .t{font-family:var(--font-display);font-size:0.98rem;}
+.card-right{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px;}
+.card-cta{font-family:var(--font-display);font-size:0.98rem;color:var(--sun-deep);}
+.card-free{background:var(--green);color:white;font-size:8px;font-weight:900;letter-spacing:0.1em;padding:3px 7px;border-radius:8px;text-transform:uppercase;}
+.card-lock{font-size:1.3rem;}
+.card-lockin .card-name{color:var(--terra);}
+
+/* ── THE MOMENT ── */
+.pay-overlay{position:fixed;inset:0;z-index:300;background:rgba(28,18,8,0.6);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.pay-overlay.show{opacity:1;pointer-events:all;}
+.pay-sheet{background:white;border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:28px 22px calc(28px + var(--safe-bot));transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.2,0.64,1);}
+.pay-overlay.show .pay-sheet{transform:translateY(0);}
+.pay-handle{width:40px;height:4px;background:rgba(0,0,0,0.12);border-radius:4px;margin:0 auto 20px;}
+.pay-sun{font-size:2.2rem;display:block;margin-bottom:8px;text-align:center;}
+.pay-title{font-family:var(--font-display);font-size:1.7rem;color:var(--sun-deep);text-align:center;margin-bottom:5px;}
+.pay-sub{font-size:0.82rem;color:var(--muted);font-weight:700;line-height:1.6;margin-bottom:14px;text-align:center;}
+.pay-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:16px;}
+.pay-chip{background:var(--sand);border-radius:20px;padding:5px 12px;font-size:0.74rem;font-weight:800;color:var(--ink);}
+.pay-price{font-family:var(--font-display);font-size:1.6rem;color:var(--blue);text-align:center;margin-bottom:2px;}
+.pay-fine{font-size:0.7rem;color:var(--muted);font-weight:700;text-align:center;margin-bottom:18px;}
+.pay-btn{display:block;width:100%;background:linear-gradient(135deg,var(--sun-deep),var(--terra));color:white;border:none;border-radius:14px;font-family:var(--font-display);font-size:1.2rem;padding:16px;cursor:pointer;box-shadow:0 5px 18px rgba(224,123,0,0.28);}
+.pay-dismiss{display:block;width:100%;background:none;border:none;font-family:var(--font-body);font-size:0.82rem;font-weight:700;color:var(--muted);padding:12px;cursor:pointer;text-align:center;}
+
+/* ── GAME SCREEN ── */
+#game-view{display:none;position:fixed;inset:0;z-index:10;background:var(--sand);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.game-inner{max-width:480px;margin:0 auto;padding:calc(var(--safe-top) + 16px) 16px calc(var(--safe-bot) + 24px);}
+
+.game-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.back-btn{background:var(--sun-deep);border:none;color:white;border-radius:50%;width:40px;height:40px;font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 12px rgba(224,123,0,0.35);}
+.game-topic{font-family:var(--font-display);font-size:1.1rem;color:var(--ink);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.stat-box{background:white;border-radius:10px;padding:5px 11px;text-align:center;box-shadow:0 2px 8px var(--shadow);}
+.stat-val{font-family:var(--font-display);font-size:1.2rem;color:var(--blue);display:block;}
+.stat-val.flash{animation:flashRed 0.35s ease;}
+@keyframes flashRed{0%,100%{color:var(--blue);}50%{color:var(--red);}}
+.stat-label{font-size:0.56rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;}
+
+.progress-bar-wrap{background:rgba(0,0,0,0.06);border-radius:10px;height:6px;margin-bottom:16px;overflow:hidden;}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--sun),var(--sky));border-radius:10px;transition:width 0.3s;}
+
+.question-card{background:white;border-radius:20px;overflow:hidden;margin-bottom:14px;box-shadow:0 5px 20px var(--shadow);}
+.q-stripe{height:5px;background:linear-gradient(90deg,var(--sun-deep),var(--sky));}
+.q-body{padding:20px 18px 16px;text-align:center;}
+.q-label{font-size:0.64rem;font-weight:800;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.q-english{font-family:var(--font-display);font-size:clamp(1.4rem,5vw,1.9rem);color:var(--ink);margin-bottom:10px;line-height:1.2;}
+.q-read-btn{background:none;border:1.5px solid rgba(26,71,184,0.18);border-radius:20px;color:var(--blue);font-size:0.76rem;font-weight:700;padding:5px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;}
+
+.answers-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.ans-btn{background:white;border:2px solid rgba(0,0,0,0.07);border-radius:14px;color:var(--ink);font-family:var(--font-body);font-size:0.85rem;font-weight:700;padding:14px 8px;cursor:pointer;transition:all 0.13s;text-align:center;line-height:1.25;box-shadow:0 3px 10px var(--shadow);}
+.ans-btn:active{transform:scale(0.97);}
+.ans-btn.correct{background:#e8faf0;border-color:var(--green);color:#166534;}
+.ans-btn.wrong{background:#fef2f2;border-color:var(--red);color:var(--red);}
+.ans-btn:disabled{cursor:default;}
+.feedback-row{text-align:center;min-height:42px;font-family:var(--font-display);font-size:1.1rem;margin-bottom:6px;}
+.fb-ok{color:var(--green);}
+.fb-bad{color:var(--red);}
+.correct-reveal{font-size:0.88rem;color:var(--ink);font-family:var(--font-body);font-weight:800;margin-top:4px;}
+
+.ts-box{background:white;border-radius:18px;padding:16px;box-shadow:0 4px 16px var(--shadow);margin-bottom:14px;display:none;}
+.ts-box.active{display:block;}
+.ts-label{font-size:0.64rem;font-weight:800;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.ts-row{display:flex;gap:8px;}
+.ts-input{flex:1;border:2px solid rgba(0,0,0,0.10);border-radius:12px;font-family:var(--font-body);font-size:1rem;font-weight:700;padding:12px 14px;color:var(--ink);background:var(--sand);outline:none;transition:border-color 0.15s;}
+.ts-input:focus{border-color:var(--blue);}
+.ts-go{background:var(--blue);color:white;border:none;border-radius:12px;font-family:var(--font-display);font-size:1rem;padding:12px 16px;cursor:pointer;white-space:nowrap;}
+.ts-mic{background:var(--terra);color:white;border:none;border-radius:12px;font-size:1.2rem;padding:12px 13px;cursor:pointer;flex-shrink:0;}
+.ts-mic.on{background:var(--red);animation:micpulse 0.8s ease-in-out infinite;}
+@keyframes micpulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.ts-hint{font-size:0.7rem;color:var(--muted);font-weight:700;margin-top:8px;text-align:center;}
+.ts-fb{text-align:center;font-family:var(--font-display);font-size:1.1rem;margin-top:8px;min-height:26px;}
+
+/* ── RESULTS ── */
+#results-view{display:none;position:fixed;inset:0;z-index:11;background:var(--sand);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.results-inner{max-width:480px;margin:0 auto;padding:calc(var(--safe-top) + 16px) 16px calc(var(--safe-bot) + 32px);}
+.results-card{background:white;border-radius:22px;overflow:hidden;box-shadow:0 8px 30px var(--shadow);}
+.results-stripe{height:6px;background:linear-gradient(90deg,var(--sun-deep),var(--sky),var(--sea));}
+.results-body{padding:26px 20px;text-align:center;}
+.r-emoji{font-size:3rem;display:block;margin-bottom:10px;}
+.r-title{font-family:var(--font-display);font-size:1.9rem;color:var(--ink);margin-bottom:4px;}
+.r-topic{color:var(--muted);font-size:0.82rem;font-weight:700;margin-bottom:18px;}
+.r-stats{display:flex;justify-content:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.r-stat{background:var(--sand);border-radius:14px;padding:11px 15px;text-align:center;}
+.r-stat-val{font-family:var(--font-display);font-size:1.65rem;color:var(--blue);display:block;}
+.r-stat-val.pen{color:var(--red);}
+.r-stat-label{font-size:0.62rem;font-weight:800;color:var(--muted);text-transform:uppercase;}
+.r-note{font-size:0.8rem;font-weight:700;color:var(--terra);margin-bottom:16px;min-height:1.2em;}
+.btn-primary{background:linear-gradient(135deg,var(--sun-deep),var(--terra));color:white;border:none;border-radius:14px;font-family:var(--font-display);font-size:1.15rem;padding:14px 28px;cursor:pointer;box-shadow:0 5px 18px rgba(224,123,0,0.28);display:inline-block;margin:4px;}
+.btn-ghost{background:white;color:var(--blue);border:2px solid rgba(26,71,184,0.2);border-radius:14px;font-family:var(--font-display);font-size:1.05rem;padding:13px 24px;cursor:pointer;display:inline-block;margin:4px;}
+.review-box{background:white;border-radius:18px;overflow:hidden;margin-top:16px;box-shadow:0 4px 16px var(--shadow);}
+.review-head{padding:14px 18px 12px;border-bottom:2px solid rgba(0,0,0,0.05);}
+.review-head h3{font-family:var(--font-display);font-size:1.2rem;color:var(--ink);margin:0;}
+.review-head p{font-size:0.7rem;font-weight:800;color:var(--muted);margin-top:2px;}
+.review-row{display:flex;align-items:center;border-bottom:1px solid rgba(0,0,0,0.05);padding:11px 16px;gap:10px;}
+.review-row:last-child{border-bottom:none;}
+.review-icon{font-size:1.1rem;flex-shrink:0;width:24px;text-align:center;}
+.review-phrases{flex:1;min-width:0;}
+.review-en{font-size:0.74rem;color:var(--muted);font-weight:700;display:block;margin-bottom:2px;}
+.review-es{font-family:var(--font-display);font-size:1.05rem;color:var(--ink);display:block;line-height:1.2;}
+.review-row.wrong .review-es{color:var(--terra);}
+.review-row.correct .review-es{color:var(--sea);}
+.footer-copy{text-align:center;font-size:10px;font-weight:700;color:rgba(28,18,8,0.25);letter-spacing:0.04em;padding:20px 0 8px;}
+
+
+/* BELT */
+.belt-badge{display:inline-flex;align-items:center;gap:8px;background:white;border-radius:20px;padding:7px 16px;box-shadow:0 3px 12px var(--shadow);margin-top:10px;}
+.belt-emoji{font-size:1.3rem;}
+.belt-info{text-align:left;}
+.belt-title{font-family:var(--font-display);font-size:1rem;color:var(--ink);display:block;line-height:1.1;}
+.belt-sub{font-size:0.6rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;}
+.par-badge{font-size:0.65rem;font-weight:800;color:var(--terra);background:rgba(201,79,44,0.08);border-radius:8px;padding:2px 7px;margin-top:3px;display:inline-block;}
+.par-badge.beat{color:var(--green);background:rgba(34,197,94,0.10);}
+.boom-overlay{position:fixed;inset:0;z-index:200;background:rgba(28,18,8,0.55);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.boom-overlay.show{opacity:1;pointer-events:all;}
+.boom-card{background:white;border-radius:28px;padding:36px 24px 28px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);transform:scale(0.7);transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1);max-width:320px;width:90%;}
+.boom-overlay.show .boom-card{transform:scale(1);}
+.boom-big{font-size:4.5rem;display:block;margin-bottom:6px;}
+.boom-title{font-family:var(--font-display);font-size:2.1rem;color:var(--sun-deep);margin-bottom:4px;}
+.boom-belt{font-family:var(--font-display);font-size:1.4rem;margin:8px 0;}
+.boom-sub{font-size:0.86rem;color:var(--muted);font-weight:700;margin-bottom:20px;line-height:1.5;}
+.boom-btn{background:linear-gradient(135deg,var(--sun-deep),var(--terra));color:white;border:none;border-radius:14px;font-family:var(--font-display);font-size:1.15rem;padding:14px 32px;cursor:pointer;box-shadow:0 5px 18px rgba(224,123,0,0.3);width:100%;}
+
+/* FEEDBACK CARD */
+.feedback-card{background:white;border-radius:20px;overflow:hidden;margin-bottom:14px;box-shadow:0 6px 24px var(--shadow);animation:riseUp 0.25s ease both;}
+.feedback-card-stripe{height:5px;}
+.feedback-card-body{padding:22px 20px;text-align:center;}
+.fb-result{font-size:2.5rem;display:block;margin-bottom:10px;}
+.fb-english{font-size:0.78rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:6px;}
+.fb-spanish{font-family:var(--font-display);font-size:1.7rem;color:var(--ink);margin-bottom:8px;line-height:1.2;}
+.fb-yours{font-size:0.82rem;font-weight:700;color:var(--red);margin-bottom:14px;min-height:1.2em;}
+.fb-read-btn{background:none;border:1.5px solid rgba(26,71,184,0.18);border-radius:20px;color:var(--blue);font-size:0.78rem;font-weight:700;padding:5px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;margin-bottom:16px;}
+.fb-continue{display:block;width:100%;background:linear-gradient(135deg,var(--sun-deep),var(--terra));color:white;border:none;border-radius:14px;font-family:var(--font-display);font-size:1.2rem;padding:15px;cursor:pointer;box-shadow:0 4px 14px rgba(224,123,0,0.28);}
+.fb-continue.correct{background:linear-gradient(135deg,var(--green),var(--sea));}
+@keyframes riseUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<div class="sky-bg"></div>
+<div class="sun-orb"></div>
+<div class="clouds"><div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div></div>
+<div class="waves">
+  <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,40 C180,80 360,0 540,40 C720,80 900,0 1080,40 C1260,80 1440,40 1440,40 L1440,80 L0,80 Z" fill="rgba(74,184,245,0.32)"/></svg>
+  <svg viewBox="0 0 1440 80" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,52 C240,0 480,80 720,52 C960,24 1200,80 1440,52 L1440,80 L0,80 Z" fill="rgba(26,158,143,0.20)"/></svg>
+</div>
+
+<!-- ══ APP SHELL ══ -->
+<div class="app-shell" id="home-view">
+  <header class="app-header">
+    <span class="brand-turbo">Turbo</span>
+    <span class="brand-holiday">Holiday ☀️</span>
+    <span class="tagline">Spanish for your hols — fast, urgent, unforgettable</span>
+    <div style="text-align:center"><div class="belt-badge" id="beltBadge"><span class="belt-emoji" id="beltEmoji">🌱</span><div class="belt-info"><span class="belt-title" id="beltTitle">Holiday Novice</span><span class="belt-sub">Your level</span></div></div></div>
+  </header>
+  <div class="app-scroll" id="app-scroll">
+    <div id="levels-wrap"></div>
+  </div>
+</div>
+
+<!-- ══ GAME ══ -->
+<div id="game-view">
+  <div class="game-inner">
+    <div class="game-header">
+      <button class="back-btn" id="backBtn">←</button>
+      <div class="game-topic" id="gameTopic"></div>
+      <div class="stat-box"><span class="stat-val" id="statTimer">0.0s</span><span class="stat-label">time</span></div>
+      <div class="stat-box"><span class="stat-val" id="statScore">0</span><span class="stat-label">correct</span></div>
+    </div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progressBar" style="width:0%"></div></div>
+    <div class="question-card">
+      <div class="q-stripe"></div>
+      <div class="q-body">
+        <div class="q-label" id="qLabel">Say it in Spanish →</div>
+        <div class="q-english" id="qText"></div>
+        <button class="q-read-btn" onclick="readQ()">🔊 Read aloud</button>
+      </div>
+    </div>
+    <div id="mcSection">
+      <div class="answers-grid" id="answersGrid"></div>
+      <div class="feedback-row" id="feedbackRow"></div>
+    </div>
+    <div class="ts-box" id="tsBox">
+      <div class="ts-label">Type or speak in Spanish</div>
+      <div class="ts-row">
+        <input class="ts-input" id="tsInput" type="text" placeholder="Type in Spanish…" autocomplete="off" autocorrect="off" spellcheck="false">
+        <div class="ts-btns">
+          <button class="ts-mic" id="tsMic" onclick="toggleMic()">🎤</button>
+          <button class="ts-go" onclick="submitTyped()">Go →</button>
+        </div>
+      </div>
+      <div class="ts-hint" id="tsHint">Tap 🎤 to speak · Enter to submit</div>
+      <div class="ts-fb" id="tsFb"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RESULTS ══ -->
+<div id="results-view">
+  <div class="results-inner">
+    <div class="results-card">
+      <div class="results-stripe"></div>
+      <div class="results-body">
+        <span class="r-emoji" id="rEmoji">🎉</span>
+        <div class="r-title" id="rTitle"></div>
+        <div class="r-topic" id="rTopic"></div>
+        <div class="r-stats">
+          <div class="r-stat"><span class="r-stat-val" id="rScore"></span><span class="r-stat-label">correct</span></div>
+          <div class="r-stat"><span class="r-stat-val" id="rTime"></span><span class="r-stat-label">total time</span></div>
+          <div class="r-stat" id="rPenBox" style="display:none"><span class="r-stat-val pen" id="rPen"></span><span class="r-stat-label">penalty</span></div>
+        </div>
+        <div class="r-note" id="rNote"></div>
+        <button class="btn-primary" id="rAgain">🔄 Again</button>
+        <button class="btn-ghost" id="rHome">← Levels</button>
+        <div class="review-box" id="mistakesBox" style="display:none">
+          <div class="review-head">
+            <h3>Your 10 questions</h3>
+            <p>Green = got it · Orange = learn it</p>
+          </div>
+          <div id="mistakesList"></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copy">Turbo Holiday · Imagination and Perseverance</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// PHRASE POOLS
+// ═══════════════════════════════════════════════
+const POOLS = {
+
+arrivals:[
+  {en:'Open',es:'Abierto'},
+  {en:'Closed',es:'Cerrado'},
+  {en:'Entrance',es:'Entrada'},
+  {en:'Exit',es:'Salida'},
+  {en:'Toilets',es:'Aseos'},
+  {en:'Men',es:'Hombres'},
+  {en:'Women',es:'Mujeres'},
+  {en:'Pull',es:'Tirar'},
+  {en:'Push',es:'Empujar'},
+  {en:'Information',es:'Información'},
+  {en:'Police',es:'Policía'},
+  {en:'Hospital',es:'Hospital'},
+  {en:'Pharmacy',es:'Farmacia'},
+  {en:'Hello!',es:'¡Hola!'},
+  {en:'Good morning!',es:'¡Buenos días!'},
+  {en:'Good afternoon!',es:'¡Buenas tardes!'},
+  {en:'Good night!',es:'¡Buenas noches!'},
+  {en:'Goodbye!',es:'¡Adiós!'},
+  {en:'See you later!',es:'¡Hasta luego!'},
+  {en:'Please',es:'Por favor'},
+  {en:'Thank you',es:'Gracias'},
+  {en:'Thank you very much',es:'Muchas gracias'},
+  {en:'You are welcome',es:'De nada'},
+  {en:'Excuse me',es:'Perdone'},
+  {en:'Sorry',es:'Lo siento'},
+  {en:'Yes',es:'Sí'},
+  {en:'No',es:'No'},
+  {en:'I do not understand',es:'No entiendo'},
+  {en:'Do you speak English?',es:'¿Habla inglés?'},
+  {en:'More slowly please',es:'Más despacio por favor'},
+  {en:'Here is my passport',es:'Aquí tiene mi pasaporte'},
+  {en:'I am here on holiday',es:'Estoy aquí de vacaciones'},
+  {en:'I have nothing to declare',es:'No tengo nada que declarar'},
+  {en:'Where are the toilets?',es:'¿Dónde están los aseos?'},
+  {en:'How much is it?',es:'¿Cuánto cuesta?'},
+  {en:'Can I pay by card?',es:'¿Puedo pagar con tarjeta?'},
+  {en:'Where is the taxi?',es:'¿Dónde está el taxi?'},
+  {en:'Where is the bus?',es:'¿Dónde está el autobús?'},
+  {en:'Please stop here',es:'Para aquí por favor'},
+  {en:'Keep the change',es:'Quédese con el cambio'},
+],
+
+hotel:[
+  {en:'Good evening!',es:'¡Buenas noches!'},
+  {en:'Hello!',es:'¡Hola!'},
+  {en:'Thank you',es:'Gracias'},
+  {en:'Please',es:'Por favor'},
+  {en:'Excuse me',es:'Perdone'},
+  {en:'Yes',es:'Sí'},
+  {en:'No',es:'No'},
+  {en:'I have a reservation',es:'Tengo una reserva'},
+  {en:'Can I have the key?',es:'¿Me da la llave?'},
+  {en:'Where is the lift?',es:'¿Dónde está el ascensor?'},
+  {en:'Where is the pool?',es:'¿Dónde está la piscina?'},
+  {en:'Where is the restaurant?',es:'¿Dónde está el restaurante?'},
+  {en:'What time is breakfast?',es:'¿A qué hora es el desayuno?'},
+  {en:'Is breakfast included?',es:'¿Está el desayuno incluido?'},
+  {en:'Can I pay by card?',es:'¿Puedo pagar con tarjeta?'},
+  {en:'How much is it?',es:'¿Cuánto cuesta?'},
+  {en:'Thank you very much',es:'Muchas gracias'},
+  {en:'The key please',es:'La llave por favor'},
+  {en:'The bill please',es:'La cuenta por favor'},
+  {en:'Towels please',es:'Toallas por favor'},
+  {en:'Hot water please',es:'Agua caliente por favor'},
+  {en:'More towels please',es:'Más toallas por favor'},
+  {en:'The shower',es:'La ducha'},
+  {en:'The room',es:'La habitación'},
+  {en:'The pool',es:'La piscina'},
+  {en:'The lift',es:'El ascensor'},
+  {en:'The restaurant',es:'El restaurante'},
+  {en:'The reception',es:'La recepción'},
+  {en:'Room number ten',es:'Habitación número diez'},
+  {en:'What time is check-out?',es:'¿A qué hora es el check-out?'},
+  {en:'Is there a pool?',es:'¿Hay piscina?'},
+  {en:'Is there a gym?',es:'¿Hay gimnasio?'},
+  {en:'Is there parking?',es:'¿Hay aparcamiento?'},
+  {en:'Is there Wi-Fi?',es:'¿Hay Wi-Fi?'},
+  {en:'The shower is not working',es:'La ducha no funciona'},
+  {en:'The TV is not working',es:'La televisión no funciona'},
+  {en:'Can I leave my bags here?',es:'¿Puedo dejar mis maletas aquí?'},
+  {en:'Can I change my room?',es:'¿Puedo cambiar de habitación?'},
+  {en:'Can you wake me at seven?',es:'¿Me puede despertar a las siete?'},
+  {en:'See you later!',es:'¡Hasta luego!'},
+],
+
+incase:[
+  {en:'Help!',es:'¡Socorro!'},
+  {en:'Call an ambulance',es:'Llame a una ambulancia'},
+  {en:'Call the police',es:'Llame a la policía'},
+  {en:'Call a doctor',es:'Llame a un médico'},
+  {en:'I need help',es:'Necesito ayuda'},
+  {en:'I have been robbed',es:'Me han robado'},
+  {en:'I have lost my passport',es:'He perdido mi pasaporte'},
+  {en:'I have lost my wallet',es:'He perdido mi cartera'},
+  {en:'Where is the hospital?',es:'¿Dónde está el hospital?'},
+  {en:'Where is the pharmacy?',es:'¿Dónde está la farmacia?'},
+  {en:'I am ill',es:'Estoy enfermo'},
+  {en:'I am in pain',es:'Tengo dolor'},
+  {en:'I have an allergy',es:'Tengo alergia'},
+  {en:'It is an emergency',es:'Es una emergencia'},
+  {en:'Please hurry',es:'Dese prisa por favor'},
+  {en:'I feel dizzy',es:'Estoy mareado'},
+  {en:'I cannot breathe',es:'No puedo respirar'},
+  {en:'I have had an accident',es:'He tenido un accidente'},
+  {en:'I am bleeding',es:'Estoy sangrando'},
+  {en:'Stop thief!',es:'¡Al ladrón!'},
+  {en:'Can you help me?',es:'¿Puede ayudarme?'},
+  {en:'I need water',es:'Necesito agua'},
+  {en:'I need a dentist',es:'Necesito un dentista'},
+  {en:'My bag has been stolen',es:'Me han robado el bolso'},
+  {en:'I need to call my embassy',es:'Necesito llamar a mi embajada'},
+  {en:'I have a high temperature',es:'Tengo fiebre alta'},
+  {en:'I take this medication',es:'Tomo este medicamento'},
+  {en:'Please call the emergency services',es:'Por favor llame a los servicios de emergencia'},
+  {en:'I am lost',es:'Estoy perdido'},
+  {en:'Fire!',es:'¡Fuego!'},
+],
+
+bar:[
+  {en:'A beer please',es:'Una cerveza por favor'},
+  {en:'Two coffees please',es:'Dos cafés por favor'},
+  {en:'A white wine please',es:'Un vino blanco por favor'},
+  {en:'A red wine please',es:'Un vino tinto por favor'},
+  {en:'A glass of water please',es:'Un vaso de agua por favor'},
+  {en:'The bill please',es:'La cuenta por favor'},
+  {en:'What tapas do you have?',es:'¿Qué tapas tienen?'},
+  {en:'Is this table free?',es:'¿Está libre esta mesa?'},
+  {en:'Can we sit outside?',es:'¿Podemos sentarnos fuera?'},
+  {en:'Same again please',es:'Lo mismo por favor'},
+  {en:'Keep the change',es:'Quédese con el cambio'},
+  {en:'Cheers!',es:'¡Salud!'},
+  {en:'A coffee with milk please',es:'Un café con leche por favor'},
+  {en:'A fresh orange juice please',es:'Un zumo de naranja natural por favor'},
+  {en:'A sparkling water please',es:'Un agua con gas por favor'},
+  {en:'Do you have lager on tap?',es:'¿Tienen cerveza de barril?'},
+  {en:'A gin and tonic please',es:'Un gin tonic por favor'},
+  {en:'Is service included?',es:'¿Está el servicio incluido?'},
+  {en:'Can I have a menu?',es:'¿Me puede traer la carta?'},
+  {en:'Can we have some olives?',es:'¿Nos puede poner unas aceitunas?'},
+  {en:'It is my round',es:'Es mi ronda'},
+  {en:'Can I pay separately?',es:'¿Puedo pagar por separado?'},
+  {en:'What is the Wi-Fi password?',es:'¿Cuál es la contraseña del Wi-Fi?'},
+  {en:'A caña please',es:'Una caña por favor'},
+  {en:'Do you have any snacks?',es:'¿Tienen algo para picar?'},
+  {en:'A round of drinks please',es:'Una ronda de bebidas por favor'},
+  {en:'A soft drink please',es:'Un refresco por favor'},
+  {en:'Two glasses of house wine',es:'Dos copas de vino de la casa'},
+  {en:'What do you recommend?',es:'¿Qué nos recomienda?'},
+  {en:'Is there a terrace?',es:'¿Hay terraza?'},
+  {en:'Could you bring some bread?',es:'¿Nos puede traer pan?'},
+  {en:'Do you have non-alcoholic drinks?',es:'¿Tienen bebidas sin alcohol?'},
+  {en:'A tonic water please',es:'Un agua tónica por favor'},
+  {en:'Have you got any crisps?',es:'¿Tienen patatas fritas?'},
+  {en:'Where are the toilets?',es:'¿Dónde están los aseos?'},
+  {en:'Can I pay by card?',es:'¿Puedo pagar con tarjeta?'},
+  {en:'We are ready to order',es:'Estamos listos para pedir'},
+  {en:'I would like a glass of sangria',es:'Quisiera un vaso de sangría'},
+  {en:'Can I see the menu?',es:'¿Puedo ver la carta?'},
+  {en:'Can I pay by card?',es:'¿Puedo pagar con tarjeta?'},
+],
+
+restaurante:[
+  {en:'A table for two please',es:'Una mesa para dos por favor'},
+  {en:'The menu please',es:'La carta por favor'},
+  {en:'What is the dish of the day?',es:'¿Cuál es el plato del día?'},
+  {en:'I am vegetarian',es:'Soy vegetariano'},
+  {en:'I am allergic to nuts',es:'Soy alérgico a los frutos secos'},
+  {en:'I would like the fish',es:'Quisiera el pescado'},
+  {en:'I would like the steak',es:'Quisiera el filete'},
+  {en:'Well done please',es:'Bien hecho por favor'},
+  {en:'Medium please',es:'Al punto por favor'},
+  {en:'Can I have more bread?',es:'¿Me puede traer más pan?'},
+  {en:'This is delicious',es:'Esto está delicioso'},
+  {en:'The bill please',es:'La cuenta por favor'},
+  {en:'I did not order this',es:'Yo no pedí esto'},
+  {en:'This is cold',es:'Esto está frío'},
+  {en:'Do you have a children\'s menu?',es:'¿Tienen menú infantil?'},
+  {en:'I would like to book a table',es:'Quisiera reservar una mesa'},
+  {en:'For eight o\'clock this evening',es:'Para las ocho esta noche'},
+  {en:'A bottle of still water',es:'Una botella de agua sin gas'},
+  {en:'What do you recommend?',es:'¿Qué recomienda usted?'},
+  {en:'We are ready to order',es:'Estamos listos para pedir'},
+  {en:'Is this gluten free?',es:'¿Es esto sin gluten?'},
+  {en:'Can I see the wine list?',es:'¿Puedo ver la carta de vinos?'},
+  {en:'We will have the set menu',es:'Tomaremos el menú del día'},
+  {en:'No dessert for me thank you',es:'Sin postre para mí gracias'},
+  {en:'This is excellent',es:'Esto está excelente'},
+  {en:'Could you turn down the music?',es:'¿Podría bajar la música?'},
+  {en:'Can we pay separately?',es:'¿Podemos pagar por separado?'},
+  {en:'Is service included?',es:'¿Está el servicio incluido?'},
+  {en:'For starter I would like the soup',es:'De primero quisiera la sopa'},
+  {en:'I would like a dessert',es:'Quisiera un postre'},
+  {en:'A bottle of sparkling water',es:'Una botella de agua con gas'},
+  {en:'This is too salty',es:'Esto está demasiado salado'},
+  {en:'Could you bring the salt?',es:'¿Me puede traer la sal?'},
+  {en:'I am allergic to shellfish',es:'Soy alérgico al marisco'},
+  {en:'Rare please',es:'Poco hecho por favor'},
+  {en:'Can I have a doggy bag?',es:'¿Me puede poner esto para llevar?'},
+  {en:'For main course I would like the chicken',es:'De segundo quisiera el pollo'},
+  {en:'What ice cream flavours do you have?',es:'¿Qué sabores de helado tienen?'},
+  {en:'Do you have a reservation?',es:'¿Tiene reserva?'},
+  {en:'Excuse me we have been waiting a long time',es:'Disculpe llevamos mucho tiempo esperando'},
+],
+
+playa:[
+  {en:'Where is the nearest beach?',es:'¿Dónde está la playa más cercana?'},
+  {en:'Can I hire a sun lounger?',es:'¿Puedo alquilar una tumbona?'},
+  {en:'Can I hire an umbrella?',es:'¿Puedo alquilar una sombrilla?'},
+  {en:'Is there a lifeguard?',es:'¿Hay socorrista?'},
+  {en:'Is it safe to swim here?',es:'¿Es seguro bañarse aquí?'},
+  {en:'The sea is rough today',es:'El mar está agitado hoy'},
+  {en:'Where can I buy sunscreen?',es:'¿Dónde puedo comprar crema solar?'},
+  {en:'I have been stung by a jellyfish',es:'Me ha picado una medusa'},
+  {en:'I have sunburn',es:'Tengo quemadura de sol'},
+  {en:'Is there a beach bar?',es:'¿Hay un chiringuito?'},
+  {en:'The flag is red today',es:'La bandera está roja hoy'},
+  {en:'Where can I get changed?',es:'¿Dónde me puedo cambiar?'},
+  {en:'Is there a shower?',es:'¿Hay ducha?'},
+  {en:'Two sun loungers and an umbrella',es:'Dos tumbonas y una sombrilla'},
+  {en:'Is there a toilet nearby?',es:'¿Hay aseos cerca?'},
+  {en:'Watch out for the current',es:'Cuidado con la corriente'},
+  {en:'The water is lovely',es:'El agua está estupenda'},
+  {en:'Where can I buy an ice cream?',es:'¿Dónde puedo comprar un helado?'},
+  {en:'Could you take our photo?',es:'¿Nos podría hacer una foto?'},
+  {en:'The sunset is beautiful',es:'El atardecer es precioso'},
+  {en:'Let\'s find some shade',es:'Busquemos sombra'},
+  {en:'The tide is coming in',es:'La marea está subiendo'},
+  {en:'How much is a sun lounger?',es:'¿Cuánto cuesta una tumbona?'},
+  {en:'Can I hire a jet ski?',es:'¿Puedo alquilar una moto acuática?'},
+  {en:'Can I hire a paddleboard?',es:'¿Puedo alquilar una tabla de paddle surf?'},
+  {en:'Are dogs allowed on the beach?',es:'¿Se permiten perros en la playa?'},
+  {en:'Put on your sunscreen',es:'Ponte la crema solar'},
+  {en:'We are going for a swim',es:'Vamos a darnos un baño'},
+  {en:'I have lost my towel',es:'He perdido mi toalla'},
+  {en:'Can I take a boat trip?',es:'¿Puedo hacer una excursión en barco?'},
+  {en:'Is there beach volleyball?',es:'¿Hay pista de vóley playa?'},
+  {en:'Stay in the shallow end',es:'Quédate en la parte poco profunda'},
+  {en:'My child is afraid of the waves',es:'Mi hijo tiene miedo a las olas'},
+  {en:'Can I leave my things here?',es:'¿Puedo dejar mis cosas aquí?'},
+  {en:'Is this beach nudist?',es:'¿Es esta playa nudista?'},
+  {en:'How far is it to the lighthouse?',es:'¿A qué distancia está el faro?'},
+  {en:'We are going to watch the sunset',es:'Vamos a ver el atardecer'},
+  {en:'Is there snorkelling here?',es:'¿Se puede hacer snorkel aquí?'},
+  {en:'Where can I park?',es:'¿Dónde puedo aparcar?'},
+  {en:'I need a bigger towel',es:'Necesito una toalla más grande'},
+],
+
+compras:[
+  {en:'How much is this?',es:'¿Cuánto cuesta esto?'},
+  {en:'Do you have this in a larger size?',es:'¿Tiene esto en una talla más grande?'},
+  {en:'Do you have this in a smaller size?',es:'¿Tiene esto en una talla más pequeña?'},
+  {en:'Can I try this on?',es:'¿Me puedo probar esto?'},
+  {en:'Where is the fitting room?',es:'¿Dónde está el probador?'},
+  {en:'I will take this one',es:'Me llevo este'},
+  {en:'Do you accept credit cards?',es:'¿Aceptan tarjeta de crédito?'},
+  {en:'Can I have a bag please?',es:'¿Me puede dar una bolsa?'},
+  {en:'Can I have a receipt?',es:'¿Me puede dar un recibo?'},
+  {en:'I would like to return this',es:'Quisiera devolver esto'},
+  {en:'It is faulty',es:'Está defectuoso'},
+  {en:'Do you have this in red?',es:'¿Tiene esto en rojo?'},
+  {en:'Is there a discount?',es:'¿Hay algún descuento?'},
+  {en:'Do you have a sale on?',es:'¿Tienen rebajas?'},
+  {en:'I am just looking thank you',es:'Solo estoy mirando gracias'},
+  {en:'Can you wrap it as a gift?',es:'¿Me lo puede envolver para regalo?'},
+  {en:'Where is the checkout?',es:'¿Dónde está la caja?'},
+  {en:'Do you have anything cheaper?',es:'¿Tiene algo más barato?'},
+  {en:'That is too expensive',es:'Eso es demasiado caro'},
+  {en:'I will think about it',es:'Lo voy a pensar'},
+  {en:'Where is the market?',es:'¿Dónde está el mercado?'},
+  {en:'What time do you close?',es:'¿A qué hora cierran?'},
+  {en:'What time do you open?',es:'¿A qué hora abren?'},
+  {en:'Do you have the same in blue?',es:'¿Lo tiene en azul?'},
+  {en:'This is a gift',es:'Es para regalo'},
+  {en:'I need batteries',es:'Necesito pilas'},
+  {en:'Have you got sun cream?',es:'¿Tienen crema solar?'},
+  {en:'Do you have change?',es:'¿Tiene cambio?'},
+  {en:'Keep the change',es:'Quédese con el cambio'},
+  {en:'I need a size forty',es:'Necesito una talla cuarenta'},
+  {en:'Is this genuine leather?',es:'¿Es esto piel auténtica?'},
+  {en:'Can I pay in euros?',es:'¿Puedo pagar en euros?'},
+  {en:'Please write down the price',es:'Por favor escriba el precio'},
+  {en:'Can you recommend a souvenir?',es:'¿Puede recomendarme un recuerdo?'},
+  {en:'Where can I find local crafts?',es:'¿Dónde puedo encontrar artesanía local?'},
+  {en:'Do you speak English?',es:'¿Habla usted inglés?'},
+  {en:'Thank you have a good day',es:'Gracias que tenga un buen día'},
+  {en:'Where is the pharmacy?',es:'¿Dónde está la farmacia?'},
+  {en:'I need a Spanish phrase book',es:'Necesito un libro de frases en español'},
+  {en:'What is the price?',es:'¿Cuál es el precio?'},
+],
+
+transporte:[
+  {en:'Where is the bus station?',es:'¿Dónde está la estación de autobús?'},
+  {en:'A single to the city centre please',es:'Un billete sencillo al centro por favor'},
+  {en:'A return to the airport please',es:'Un billete de ida y vuelta al aeropuerto por favor'},
+  {en:'What time is the next bus?',es:'¿A qué hora es el próximo autobús?'},
+  {en:'Where does this bus go?',es:'¿Adónde va este autobús?'},
+  {en:'Is this the right bus for the beach?',es:'¿Es este el autobús para la playa?'},
+  {en:'Can you tell me when to get off?',es:'¿Me puede decir cuándo bajarme?'},
+  {en:'I need a taxi',es:'Necesito un taxi'},
+  {en:'Take me to this address',es:'Lléveme a esta dirección'},
+  {en:'How much will it cost?',es:'¿Cuánto costará?'},
+  {en:'Please stop here',es:'Para aquí por favor'},
+  {en:'Where is the train station?',es:'¿Dónde está la estación de tren?'},
+  {en:'Is this seat free?',es:'¿Está libre este asiento?'},
+  {en:'I would like to hire a car',es:'Quisiera alquilar un coche'},
+  {en:'Is insurance included?',es:'¿Está el seguro incluido?'},
+  {en:'How far is it to walk?',es:'¿Está lejos a pie?'},
+  {en:'Turn left',es:'Gire a la izquierda'},
+  {en:'Turn right',es:'Gire a la derecha'},
+  {en:'Go straight ahead',es:'Siga todo recto'},
+  {en:'It is on the corner',es:'Está en la esquina'},
+  {en:'Is there a metro?',es:'¿Hay metro?'},
+  {en:'Where do I buy a ticket?',es:'¿Dónde compro el billete?'},
+  {en:'The bus is late',es:'El autobús lleva retraso'},
+  {en:'I have missed my bus',es:'He perdido el autobús'},
+  {en:'Where is the nearest bus stop?',es:'¿Dónde está la parada de autobús más cercana?'},
+  {en:'I am looking for the old town',es:'Estoy buscando el casco antiguo'},
+  {en:'I have a flat tyre',es:'Tengo un pinchazo'},
+  {en:'My car has broken down',es:'Mi coche se ha averiado'},
+  {en:'I need a mechanic',es:'Necesito un mecánico'},
+  {en:'How many stops is it?',es:'¿Cuántas paradas hay?'},
+  {en:'Is there a bike hire?',es:'¿Hay alquiler de bicicletas?'},
+  {en:'Where can I get a map?',es:'¿Dónde puedo conseguir un mapa?'},
+  {en:'Is this the road to Malaga?',es:'¿Es esta la carretera a Málaga?'},
+  {en:'Where can I park?',es:'¿Dónde puedo aparcar?'},
+  {en:'Is there a car park nearby?',es:'¿Hay un aparcamiento cerca?'},
+  {en:'How far is the beach?',es:'¿A qué distancia está la playa?'},
+  {en:'Can I cycle here?',es:'¿Se puede ir en bicicleta aquí?'},
+  {en:'It is on the right',es:'Está a la derecha'},
+  {en:'It is on the left',es:'Está a la izquierda'},
+  {en:'Is there a train to Seville?',es:'¿Hay un tren a Sevilla?'},
+],
+
+noche:[
+  {en:'Where is the best nightclub?',es:'¿Dónde está la mejor discoteca?'},
+  {en:'What time does it open?',es:'¿A qué hora abre?'},
+  {en:'What time does it close?',es:'¿A qué hora cierra?'},
+  {en:'Is there a queue?',es:'¿Hay cola?'},
+  {en:'How much is entry?',es:'¿Cuánto cuesta la entrada?'},
+  {en:'Is there a dress code?',es:'¿Hay código de vestimenta?'},
+  {en:'A bottle of champagne please',es:'Una botella de champán por favor'},
+  {en:'Can we get a table?',es:'¿Podemos conseguir una mesa?'},
+  {en:'Can I have a glass of water?',es:'¿Me puede dar un vaso de agua?'},
+  {en:'I lost my friends',es:'He perdido a mis amigos'},
+  {en:'I need to find a taxi',es:'Necesito encontrar un taxi'},
+  {en:'Where is the nearest taxi rank?',es:'¿Dónde está la parada de taxis más cercana?'},
+  {en:'I am not feeling well',es:'No me encuentro bien'},
+  {en:'Can you call me a taxi?',es:'¿Puede llamarme un taxi?'},
+  {en:'What time is the last bus?',es:'¿A qué hora es el último autobús?'},
+  {en:'Is there a cloakroom?',es:'¿Hay guardarropa?'},
+  {en:'I would like to reserve a table',es:'Quisiera reservar una mesa'},
+  {en:'Do you have a VIP area?',es:'¿Tienen zona VIP?'},
+  {en:'Two vodka tonics please',es:'Dos vodka con tónica por favor'},
+  {en:'What music do you play?',es:'¿Qué música ponen?'},
+  {en:'Is this a good area?',es:'¿Es una buena zona?'},
+  {en:'I want to go home',es:'Quiero irme a casa'},
+  {en:'My phone is dead',es:'Mi teléfono se ha quedado sin batería'},
+  {en:'Can I charge my phone here?',es:'¿Puedo cargar mi teléfono aquí?'},
+  {en:'I have lost my bag',es:'He perdido mi bolso'},
+  {en:'Where is the nearest cash machine?',es:'¿Dónde está el cajero más cercano?'},
+  {en:'Two beers please',es:'Dos cervezas por favor'},
+  {en:'Is there a smoking area?',es:'¿Hay zona de fumadores?'},
+  {en:'We are looking for somewhere to eat',es:'Estamos buscando un sitio para comer'},
+  {en:'What time does the bar close?',es:'¿A qué hora cierra el bar?'},
+],
+
+medico:[
+  {en:'I need to see a doctor',es:'Necesito ver a un médico'},
+  {en:'Where is the nearest doctor?',es:'¿Dónde está el médico más cercano?'},
+  {en:'I have a headache',es:'Tengo dolor de cabeza'},
+  {en:'I have a stomach ache',es:'Tengo dolor de estómago'},
+  {en:'I have a sore throat',es:'Me duele la garganta'},
+  {en:'I have a temperature',es:'Tengo fiebre'},
+  {en:'I am allergic to penicillin',es:'Soy alérgico a la penicilina'},
+  {en:'I have diabetes',es:'Tengo diabetes'},
+  {en:'I have asthma',es:'Tengo asma'},
+  {en:'I am pregnant',es:'Estoy embarazada'},
+  {en:'I take this medication',es:'Tomo este medicamento'},
+  {en:'I have chest pain',es:'Tengo dolor en el pecho'},
+  {en:'I have been sick',es:'He vomitado'},
+  {en:'I have diarrhoea',es:'Tengo diarrea'},
+  {en:'I have sunstroke',es:'Tengo una insolación'},
+  {en:'I have been bitten by a dog',es:'Me ha mordido un perro'},
+  {en:'I have been stung by a wasp',es:'Me ha picado una avispa'},
+  {en:'I need a prescription',es:'Necesito una receta'},
+  {en:'Is there a pharmacy nearby?',es:'¿Hay una farmacia cerca?'},
+  {en:'I have food poisoning',es:'Tengo intoxicación alimentaria'},
+  {en:'Can you give me something for the pain?',es:'¿Puede darme algo para el dolor?'},
+  {en:'I have broken my arm',es:'Me he roto el brazo'},
+  {en:'I need stitches',es:'Necesito puntos'},
+  {en:'I have lost my EHIC card',es:'He perdido mi tarjeta sanitaria europea'},
+  {en:'I have travel insurance',es:'Tengo seguro de viaje'},
+  {en:'I need to go to hospital',es:'Tengo que ir al hospital'},
+  {en:'Where is the accident and emergency?',es:'¿Dónde está urgencias?'},
+  {en:'I feel faint',es:'Me voy a desmayar'},
+  {en:'My child is ill',es:'Mi hijo está enfermo'},
+  {en:'How many times a day?',es:'¿Cuántas veces al día?'},
+],
+
+explorar:[
+  {en:'Where is the old town?',es:'¿Dónde está el casco antiguo?'},
+  {en:'Where is the cathedral?',es:'¿Dónde está la catedral?'},
+  {en:'How much is the entrance?',es:'¿Cuánto cuesta la entrada?'},
+  {en:'Is there a guided tour?',es:'¿Hay una visita guiada?'},
+  {en:'What time does it open?',es:'¿A qué hora abre?'},
+  {en:'What time does it close?',es:'¿A qué hora cierra?'},
+  {en:'Is it far from here?',es:'¿Está lejos de aquí?'},
+  {en:'Is there a map of the town?',es:'¿Hay un mapa del pueblo?'},
+  {en:'Can you recommend something to see?',es:'¿Puede recomendarme algo que ver?'},
+  {en:'Is this the right way to the castle?',es:'¿Es por aquí para llegar al castillo?'},
+  {en:'Where can I buy tickets?',es:'¿Dónde puedo comprar entradas?'},
+  {en:'Is photography allowed?',es:'¿Está permitido hacer fotos?'},
+  {en:'Is there a discount for students?',es:'¿Hay descuento para estudiantes?'},
+  {en:'Is there a discount for children?',es:'¿Hay descuento para niños?'},
+  {en:'Where is the tourist office?',es:'¿Dónde está la oficina de turismo?'},
+  {en:'Is there a market today?',es:'¿Hay mercado hoy?'},
+  {en:'What is this building?',es:'¿Qué es este edificio?'},
+  {en:'How old is it?',es:'¿Cuántos años tiene?'},
+  {en:'Is there a flamenco show?',es:'¿Hay un espectáculo de flamenco?'},
+  {en:'Where is the nearest viewpoint?',es:'¿Dónde está el mirador más cercano?'},
+  {en:'Can I take a photo of you?',es:'¿Le puedo hacer una foto?'},
+  {en:'Could you take a photo of us?',es:'¿Nos podría hacer una foto?'},
+  {en:'Where is the main square?',es:'¿Dónde está la plaza mayor?'},
+  {en:'Is there a local festival?',es:'¿Hay alguna fiesta local?'},
+  {en:'What is the local speciality?',es:'¿Cuál es la especialidad local?'},
+  {en:'I would like to visit the museum',es:'Me gustaría visitar el museo'},
+  {en:'Is it open on Sundays?',es:'¿Está abierto los domingos?'},
+  {en:'How do I get back to the hotel?',es:'¿Cómo vuelvo al hotel?'},
+  {en:'Is there a boat trip?',es:'¿Hay una excursión en barco?'},
+  {en:'What time is the last entry?',es:'¿A qué hora es la última entrada?'},
+],
+
+piscina:[
+  {en:'Where is the pool?',es:'¿Dónde está la piscina?'},
+  {en:'Is the pool heated?',es:'¿La piscina tiene calefacción?'},
+  {en:'What time does the pool open?',es:'¿A qué hora abre la piscina?'},
+  {en:'What time does the pool close?',es:'¿A qué hora cierra la piscina?'},
+  {en:'Can I hire a sun lounger?',es:'¿Puedo alquilar una tumbona?'},
+  {en:'Can I hire a towel?',es:'¿Puedo alquilar una toalla?'},
+  {en:'Is there a children\'s pool?',es:'¿Hay piscina infantil?'},
+  {en:'My child cannot swim',es:'Mi hijo no sabe nadar'},
+  {en:'No running please',es:'No corra por favor'},
+  {en:'Can I have a pool towel?',es:'¿Me puede dar una toalla de piscina?'},
+  {en:'Two sun loungers please',es:'Dos tumbonas por favor'},
+  {en:'Is there a pool bar?',es:'¿Hay bar en la piscina?'},
+  {en:'A cold beer please',es:'Una cerveza fría por favor'},
+  {en:'Can I have a sun umbrella?',es:'¿Me puede poner una sombrilla?'},
+  {en:'The water is cold',es:'El agua está fría'},
+  {en:'The water is lovely',es:'El agua está estupenda'},
+  {en:'Is there a jacuzzi?',es:'¿Hay jacuzzi?'},
+  {en:'Where can I leave my valuables?',es:'¿Dónde puedo dejar mis objetos de valor?'},
+  {en:'Is there a shallow end?',es:'¿Hay parte poco profunda?'},
+  {en:'Is there a lifeguard?',es:'¿Hay socorrista?'},
+  {en:'Can I swim laps?',es:'¿Puedo hacer largos?'},
+  {en:'Is the pool salt water?',es:'¿La piscina es de agua salada?'},
+  {en:'Two iced coffees please',es:'Dos cafés con hielo por favor'},
+  {en:'Can we eat by the pool?',es:'¿Podemos comer junto a la piscina?'},
+  {en:'Where are the changing rooms?',es:'¿Dónde están los vestuarios?'},
+  {en:'Is there a slide?',es:'¿Hay tobogán?'},
+  {en:'Keep the change',es:'Quédese con el cambio'},
+  {en:'The bill please',es:'La cuenta por favor'},
+  {en:'Can I pay by card?',es:'¿Puedo pagar con tarjeta?'},
+  {en:'Same again please',es:'Lo mismo por favor'},
+],
+
+coche:[
+  {en:'I would like to hire a car',es:'Quisiera alquilar un coche'},
+  {en:'For three days please',es:'Para tres días por favor'},
+  {en:'Is insurance included?',es:'¿Está el seguro incluido?'},
+  {en:'Is there a deposit?',es:'¿Hay depósito?'},
+  {en:'Can I pay by card?',es:'¿Puedo pagar con tarjeta?'},
+  {en:'Is it automatic or manual?',es:'¿Es automático o manual?'},
+  {en:'I would like an automatic',es:'Quisiera un coche automático'},
+  {en:'Where is the petrol station?',es:'¿Dónde está la gasolinera?'},
+  {en:'Fill it up please',es:'Llénelo por favor'},
+  {en:'Unleaded petrol please',es:'Gasolina sin plomo por favor'},
+  {en:'Diesel please',es:'Diésel por favor'},
+  {en:'My car has broken down',es:'Mi coche se ha averiado'},
+  {en:'I have a flat tyre',es:'Tengo un pinchazo'},
+  {en:'I need a mechanic',es:'Necesito un mecánico'},
+  {en:'Where can I park?',es:'¿Dónde puedo aparcar?'},
+  {en:'Is parking free?',es:'¿El aparcamiento es gratuito?'},
+  {en:'How much is parking per day?',es:'¿Cuánto cuesta aparcar por día?'},
+  {en:'Is there a motorway toll?',es:'¿Hay peaje en la autopista?'},
+  {en:'What is the speed limit?',es:'¿Cuál es el límite de velocidad?'},
+  {en:'I have had an accident',es:'He tenido un accidente'},
+  {en:'I need the police',es:'Necesito a la policía'},
+  {en:'The engine warning light is on',es:'La luz de avería está encendida'},
+  {en:'I am lost',es:'Estoy perdido'},
+  {en:'Can you help me with directions?',es:'¿Me puede ayudar con las indicaciones?'},
+  {en:'Turn left at the roundabout',es:'Gire a la izquierda en la rotonda'},
+  {en:'Is this the right road?',es:'¿Es esta la carretera correcta?'},
+  {en:'The air conditioning is not working',es:'El aire acondicionado no funciona'},
+  {en:'I need to return the car',es:'Tengo que devolver el coche'},
+  {en:'Where do I return the car?',es:'¿Dónde devuelvo el coche?'},
+  {en:'Can I extend the hire?',es:'¿Puedo ampliar el alquiler?'},
+],
+
+helado:[
+  {en:'An ice cream please',es:'Un helado por favor'},
+  {en:'Two ice creams please',es:'Dos helados por favor'},
+  {en:'What flavours do you have?',es:'¿Qué sabores tienen?'},
+  {en:'Chocolate please',es:'Chocolate por favor'},
+  {en:'Strawberry please',es:'Fresa por favor'},
+  {en:'Vanilla please',es:'Vainilla por favor'},
+  {en:'Two scoops please',es:'Dos bolas por favor'},
+  {en:'In a cone please',es:'En un cucurucho por favor'},
+  {en:'In a cup please',es:'En un vasito por favor'},
+  {en:'With cream please',es:'Con nata por favor'},
+  {en:'A churro please',es:'Un churro por favor'},
+  {en:'With hot chocolate',es:'Con chocolate caliente'},
+  {en:'How much is it?',es:'¿Cuánto cuesta?'},
+  {en:'A bottle of water please',es:'Una botella de agua por favor'},
+  {en:'A cold drink please',es:'Una bebida fría por favor'},
+  {en:'A Fanta please',es:'Una Fanta por favor'},
+  {en:'A Coca-Cola please',es:'Una Coca-Cola por favor'},
+  {en:'Do you have lemon?',es:'¿Tienen limón?'},
+  {en:'Do you have mango?',es:'¿Tienen mango?'},
+  {en:'A sandwich please',es:'Un bocadillo por favor'},
+  {en:'What is in this one?',es:'¿Qué lleva este?'},
+  {en:'Is it spicy?',es:'¿Es picante?'},
+  {en:'It is delicious',es:'Está delicioso'},
+  {en:'Can I have a napkin?',es:'¿Me puede dar una servilleta?'},
+  {en:'A bag of crisps please',es:'Una bolsa de patatas por favor'},
+  {en:'A hot dog please',es:'Un perrito caliente por favor'},
+  {en:'Do you have any vegetarian options?',es:'¿Tienen opciones vegetarianas?'},
+  {en:'What do you recommend?',es:'¿Qué recomienda?'},
+  {en:'One more please',es:'Uno más por favor'},
+  {en:'Keep the change',es:'Quédese con el cambio'},
+],
+
+actividades:[
+  {en:'I would like to book a trip',es:'Quisiera reservar una excursión'},
+  {en:'How much does it cost?',es:'¿Cuánto cuesta?'},
+  {en:'Is it suitable for children?',es:'¿Es apto para niños?'},
+  {en:'What time does it leave?',es:'¿A qué hora sale?'},
+  {en:'How long does it last?',es:'¿Cuánto dura?'},
+  {en:'Is lunch included?',es:'¿Está el almuerzo incluido?'},
+  {en:'I would like to go snorkelling',es:'Quisiera hacer snorkel'},
+  {en:'I would like to go surfing',es:'Quisiera hacer surf'},
+  {en:'Can I hire a bike?',es:'¿Puedo alquilar una bicicleta?'},
+  {en:'Is there a guided tour?',es:'¿Hay una visita guiada?'},
+  {en:'How far is the walk?',es:'¿A qué distancia está el paseo?'},
+  {en:'Is it difficult?',es:'¿Es difícil?'},
+  {en:'I would like to try flamenco',es:'Me gustaría probar el flamenco'},
+  {en:'Where can I buy tickets?',es:'¿Dónde puedo comprar entradas?'},
+  {en:'Is it open today?',es:'¿Está abierto hoy?'},
+  {en:'Two adults and two children',es:'Dos adultos y dos niños'},
+  {en:'Is there a discount?',es:'¿Hay descuento?'},
+  {en:'Can I cancel?',es:'¿Puedo cancelar?'},
+  {en:'What should I wear?',es:'¿Qué ropa debo llevar?'},
+  {en:'Do I need to bring anything?',es:'¿Necesito traer algo?'},
+  {en:'I would like to go on a boat trip',es:'Me gustaría hacer una excursión en barco'},
+  {en:'Is there a morning session?',es:'¿Hay sesión de mañana?'},
+  {en:'Is equipment included?',es:'¿Está el equipo incluido?'},
+  {en:'I have never done this before',es:'Nunca he hecho esto antes'},
+  {en:'Is it safe?',es:'¿Es seguro?'},
+  {en:'I am a beginner',es:'Soy principiante'},
+  {en:'Where do we meet?',es:'¿Dónde quedamos?'},
+  {en:'Can I take photos?',es:'¿Puedo hacer fotos?'},
+  {en:'This is amazing',es:'Esto es increíble'},
+  {en:'I would like to book again',es:'Quisiera reservar otra vez'},
+],
+
+vino:[
+  {en:'Can I see the wine list?',es:'¿Puedo ver la carta de vinos?'},
+  {en:'What do you recommend?',es:'¿Qué recomienda?'},
+  {en:'A glass of red wine please',es:'Una copa de vino tinto por favor'},
+  {en:'A glass of white wine please',es:'Una copa de vino blanco por favor'},
+  {en:'A glass of rosé please',es:'Una copa de vino rosado por favor'},
+  {en:'A bottle of local wine please',es:'Una botella de vino local por favor'},
+  {en:'Is this wine from the region?',es:'¿Es este vino de la región?'},
+  {en:'This wine is excellent',es:'Este vino está excelente'},
+  {en:'A glass of cava please',es:'Una copa de cava por favor'},
+  {en:'What is this dish?',es:'¿Qué es este plato?'},
+  {en:'What is in it?',es:'¿Qué lleva?'},
+  {en:'Is it spicy?',es:'¿Es picante?'},
+  {en:'It is delicious',es:'Está delicioso'},
+  {en:'What is the local speciality?',es:'¿Cuál es la especialidad local?'},
+  {en:'I will have what they are having',es:'Tomaré lo mismo que ellos'},
+  {en:'A portion of jamón please',es:'Una ración de jamón por favor'},
+  {en:'A portion of cheese please',es:'Una ración de queso por favor'},
+  {en:'Some bread please',es:'Un poco de pan por favor'},
+  {en:'A portion of patatas bravas please',es:'Una ración de patatas bravas por favor'},
+  {en:'What cheese do you have?',es:'¿Qué quesos tienen?'},
+  {en:'Do you have Manchego?',es:'¿Tienen Manchego?'},
+  {en:'Another bottle please',es:'Otra botella por favor'},
+  {en:'The same again please',es:'Lo mismo por favor'},
+  {en:'Cheers!',es:'¡Salud!'},
+  {en:'This is very good',es:'Esto está muy bueno'},
+  {en:'Can we take the rest home?',es:'¿Podemos llevarnos el resto?'},
+  {en:'Do you have wine by the glass?',es:'¿Tienen vino por copa?'},
+  {en:'A dry white wine please',es:'Un vino blanco seco por favor'},
+  {en:'Not too sweet please',es:'No muy dulce por favor'},
+  {en:'Is this local olive oil?',es:'¿Es este aceite de oliva local?'},
+],
+
+
+};
+
+// ═══════════════════════════════════════════════
+// LEVEL STRUCTURE
+// ═══════════════════════════════════════════════
+// ── BELT SYSTEM ──
+const BELTS = [
+  { id:'novice',    emoji:'🌱', title:'Holiday Novice',      color:'#7a6a58', unlockedBy:null },
+  { id:'seeker',    emoji:'🌞', title:'Sun Seeker',          color:'#f5a623', unlockedBy:'lockin1' },
+  { id:'local',     emoji:'🍺', title:'The Local',           color:'#22c55e', unlockedBy:'lockin2' },
+  { id:'turbo',     emoji:'🔥', title:'Turbo Holidaymaker',  color:'#e07b00', unlockedBy:'lockin3' },
+  { id:'master',    emoji:'🏆', title:'Holiday Master',      color:'#1a47b8', unlockedBy:'grandlockin' },
+];
+
+function getCurrentBelt(){
+  for(let i=BELTS.length-1;i>=0;i--){
+    const b=BELTS[i];
+    if(!b.unlockedBy) return b;
+    if(getBest(b.unlockedBy)>0) return b;
+  }
+  return BELTS[0];
+}
+
+const LEVELS = [
+  // ── FREE ──
+  { id:'arrivals', emoji:'✈️', name:'Arrivals',      sub:'You\'ve just landed — clock is running',     stripe:'linear-gradient(90deg,#4ab8f5,#1a47b8)', pool:'arrivals',    free:true,  pen:30, par:150 },
+  { id:'hotel',    emoji:'🏨', name:'Hotel',          sub:'Check-in, rooms, requests — beat the clock', stripe:'linear-gradient(90deg,#f5a623,#e07b00)', pool:'hotel',       free:true,  pen:30, par:140 },
+  { id:'incase',   emoji:'🆘', name:'In Case',        sub:'Keep these close — how fast can you go?',    stripe:'linear-gradient(90deg,#e03c2c,#c94f2c)', pool:'incase',      free:true,  pen:30, par:130 },
+  { id:'lockin0',  emoji:'🔒', name:'Lock In — 0',    sub:'Arrivals · Hotel · In Case — produce it',    stripe:'linear-gradient(90deg,#1a47b8,#e07b00)', isLockIn:true, sources:['arrivals','hotel','incase'], free:true, pen:30, par:140 },
+
+  // ── PAID — Round 1: Landing & Getting Set Up ──
+  { id:'coche',        emoji:'🚗', name:'Hiring a Car',    sub:'Rental desk, petrol, parking',         stripe:'linear-gradient(90deg,#1a47b8,#22c55e)', pool:'coche',       free:false, pen:30, par:140, round:1 },
+  { id:'bar',          emoji:'🍺', name:'Bars & Cafés',   sub:'Drinks, tapas, the vibe',              stripe:'linear-gradient(90deg,#22c55e,#4ab8f5)', pool:'bar',         free:false, pen:30, par:140, round:1 },
+  { id:'restaurante',  emoji:'🍽️', name:'Restaurant',     sub:'Menu to bill — the full meal',         stripe:'linear-gradient(90deg,#f5a623,#22c55e)', pool:'restaurante', free:false, pen:30, par:135, round:1 },
+  { id:'lockin1',      emoji:'🔒', name:'Lock In — 1',    sub:'Car · Bar · Restaurant — produce it',  stripe:'linear-gradient(90deg,#c94f2c,#1a47b8)', isLockIn:true, sources:['coche','bar','restaurante'], free:false, pen:30, par:135, round:1, beltUnlock:'seeker' },
+
+  // ── PAID — Round 2: Sun & Sea ──
+  { id:'playa',        emoji:'🏖️', name:'Beach',           sub:'Sun, sea, and staying safe',           stripe:'linear-gradient(90deg,#4ab8f5,#1a9e8f)', pool:'playa',       free:false, pen:30, par:130, round:2 },
+  { id:'piscina',      emoji:'🏊', name:'At the Pool',     sub:'Sunloungers, pool bar, the works',     stripe:'linear-gradient(90deg,#1a9e8f,#4ab8f5)', pool:'piscina',     free:false, pen:30, par:125, round:2 },
+  { id:'helado',       emoji:'🍦', name:'Ice Cream & Snacks', sub:'Chiringuito, helados, quick wins',  stripe:'linear-gradient(90deg,#f5a623,#4ab8f5)', pool:'helado',      free:false, pen:30, par:125, round:2 },
+  { id:'actividades',  emoji:'🏄', name:'Activities',      sub:'Excursions, watersports, adventures',  stripe:'linear-gradient(90deg,#22c55e,#1a9e8f)', pool:'actividades', free:false, pen:30, par:125, round:2 },
+  { id:'lockin2',      emoji:'🔒', name:'Lock In — 2',    sub:'Beach · Pool · Snacks · Activities',   stripe:'linear-gradient(90deg,#1a9e8f,#c94f2c)', isLockIn:true, sources:['playa','piscina','helado','actividades'], free:false, pen:30, par:130, round:2, beltUnlock:'local' },
+
+  // ── PAID — Round 3: Getting Around & Shopping ──
+  { id:'compras',      emoji:'🛍️', name:'Shopping',        sub:'Markets, boutiques, returns',          stripe:'linear-gradient(90deg,#c94f2c,#f5a623)', pool:'compras',     free:false, pen:30, par:120, round:3 },
+  { id:'transporte',   emoji:'🚌', name:'Getting Around',  sub:'Buses, taxis, trains',                 stripe:'linear-gradient(90deg,#1a47b8,#4ab8f5)', pool:'transporte',  free:false, pen:30, par:120, round:3 },
+  { id:'lockin3',      emoji:'🔒', name:'Lock In — 3',    sub:'Shopping · Transport — produce it',    stripe:'linear-gradient(90deg,#c94f2c,#1a9e8f)', isLockIn:true, sources:['compras','transporte'], free:false, pen:30, par:120, round:3, beltUnlock:'turbo' },
+
+  // ── PAID — Round 4: Going Deeper ──
+  { id:'noche',        emoji:'🌙', name:'Nights Out',      sub:'Bars, clubs, getting home safe',       stripe:'linear-gradient(90deg,#1a47b8,#c94f2c)', pool:'noche',       free:false, pen:30, par:115, round:4 },
+  { id:'vino',         emoji:'🍷', name:'Wine & Food',     sub:'Local wine, jamón, the real stuff',    stripe:'linear-gradient(90deg,#c94f2c,#f5a623)', pool:'vino',        free:false, pen:30, par:110, round:4 },
+  { id:'explorar',     emoji:'🗺️', name:'Exploring',       sub:'Sights, tours, local life',            stripe:'linear-gradient(90deg,#22c55e,#1a47b8)', pool:'explorar',    free:false, pen:30, par:110, round:4 },
+  { id:'lockin4',      emoji:'🔒', name:'Lock In — 4',    sub:'Nights · Wine · Exploring — produce it',stripe:'linear-gradient(90deg,#1a9e8f,#e07b00)', isLockIn:true, sources:['noche','vino','explorar'], free:false, pen:30, par:115, round:4 },
+
+  // ── PAID — Round 5: Just In Case ──
+  { id:'medico',       emoji:'🏥', name:'At the Doctor',   sub:'Know it before you need it',           stripe:'linear-gradient(90deg,#e03c2c,#f5a623)', pool:'medico',      free:false, pen:30, par:110, round:5 },
+  { id:'lockin5',      emoji:'🔒', name:'Lock In — 5',    sub:'Doctor — produce it cold',             stripe:'linear-gradient(90deg,#e03c2c,#1a47b8)', isLockIn:true, sources:['medico','incase'], free:false, pen:30, par:115, round:5 },
+
+  // ── GRAND ──
+  { id:'grandlockin',  emoji:'🏆', name:'Grand Lock In',   sub:'Everything — quick and clear',         stripe:'linear-gradient(90deg,#1a47b8,#e07b00)', isLockIn:true, isGrand:true, free:false, pen:30, par:90, beltUnlock:'master' },
+];
+const ROUND_NAMES = { 1:'Eating & Drinking', 2:'Sun & Sea', 3:'Getting Around', 4:'Going Deeper', 5:'Just In Case' };
+const PAID_CHIPS = ['🍺 Bars','🍽️ Restaurant','🍦 Snacks','🏖️ Beach','🏊 Pool','🏄 Activities','🛍️ Shopping','🚌 Transport','🚗 Car Hire','🌙 Nights Out','🍷 Wine & Food','🗺️ Exploring','🏥 Doctor','🔒 ×5 Lock Ins','🏆 Grand Lock In'];
+
+// ═══════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════
+const LS='th3_';
+const lsGet=k=>{try{return localStorage.getItem(LS+k);}catch(e){return null;}};
+const lsSet=(k,v)=>{try{localStorage.setItem(LS+k,String(v));}catch(e){}};
+function getBest(id){const v=lsGet('b_'+id);return v?parseFloat(v):0;}
+function setBest(id,t){lsSet('b_'+id,t);}
+function isPaid(){return lsGet('paid')==='1';}
+function isUnlocked(lvl){return lvl.free||isPaid();}
+
+// ═══════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function fmt(s){return s?s.toFixed(1)+'s':'—';}
+function norm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[¡!¿?.,;:]/g,'').trim();}
+function isClose(typed,correct){
+  const a=norm(typed),b=norm(correct);
+  if(a===b)return true;
+  const wa=a.split(/\s+/),wb=b.split(/\s+/);
+  let m=0;for(const w of wa)if(wb.includes(w))m++;
+  return m/wb.length>=0.72;
+}
+function buildPool(lvl){
+  if(lvl.isGrand)return Object.values(POOLS).flat();
+  if(lvl.isLockIn)return lvl.sources.flatMap(s=>POOLS[s]||[]);
+  return POOLS[lvl.pool]||[];
+}
+
+// ═══════════════════════════════════════════════
+// AUDIO
+// ═══════════════════════════════════════════════
+let _ac=null;
+function ac(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();if(_ac.state==='suspended')_ac.resume();return _ac;}
+function tone(f,d,t,v,dl){try{const c=ac(),now=c.currentTime+(dl||0),o=c.createOscillator(),g=c.createGain();o.type=t||'triangle';o.frequency.setValueAtTime(f,now);g.gain.setValueAtTime(0.0001,now);g.gain.exponentialRampToValueAtTime(v||0.03,now+0.01);g.gain.exponentialRampToValueAtTime(0.0001,now+d);o.connect(g);g.connect(c.destination);o.start(now);o.stop(now+d+0.02);}catch(e){}}
+function toneGood(){tone(660,.08,'triangle',.03,0);tone(880,.1,'triangle',.03,.08);}
+function toneBad(){tone(220,.1,'sawtooth',.02,0);tone(180,.14,'sawtooth',.02,.08);}
+function toneStart(){tone(392,.1,'triangle',.025,0);tone(523,.12,'triangle',.03,.08);}
+function toneWin(){tone(523,.08,'triangle',.03,0);tone(659,.08,'triangle',.03,.08);tone(784,.12,'triangle',.035,.16);}
+function readQ(){const u=new SpeechSynthesisUtterance(document.getElementById('qText').textContent);u.lang='en-GB';u.rate=0.90;u.volume=0.9;speechSynthesis.cancel();speechSynthesis.speak(u);}
+function readES(txt){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='es-ES';u.rate=0.82;u.volume=0.85;speechSynthesis.speak(u);}
+
+// ═══════════════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════════════
+function confetti(){const cols=['#f5a623','#4ab8f5','#22c55e','#e03c2c','#1a47b8'];for(let i=0;i<30;i++){const p=document.createElement('div');p.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:-20px;width:10px;height:14px;border-radius:3px;background:${cols[i%5]};z-index:9999;pointer-events:none;opacity:0.95;transform:rotate(${Math.random()*360}deg);transition:transform 1.6s ease-out,top 1.6s ease-out,opacity 1.6s ease-out;`;document.body.appendChild(p);requestAnimationFrame(()=>{p.style.top='105vh';p.style.transform=`translateX(${(Math.random()-.5)*180}px) rotate(${Math.random()*720}deg)`;p.style.opacity='0.04';});setTimeout(()=>p.remove(),1800);}}
+
+// ═══════════════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════════════
+function renderHome(){
+  // Update belt badge
+  const belt = getCurrentBelt();
+  document.getElementById('beltEmoji').textContent = belt.emoji;
+  document.getElementById('beltTitle').textContent = belt.title;
+  document.getElementById('beltBadge').style.borderLeft = `4px solid ${belt.color}`;
+
+  const wrap=document.getElementById('levels-wrap');
+  wrap.innerHTML='';
+  let currentRound=0;
+
+  LEVELS.forEach((lvl,i)=>{
+    // Section header for paid rounds
+    if(!lvl.free && lvl.round && lvl.round!==currentRound){
+      currentRound=lvl.round;
+      const sh=document.createElement('div');
+      sh.className='section-head';
+      sh.innerHTML=`<span class="section-head-label">${ROUND_NAMES[lvl.round]||'Round '+lvl.round}</span>`;
+      wrap.appendChild(sh);
+    }
+
+    // Grand Lock In section header
+    if(lvl.isGrand){
+      const sh=document.createElement('div');
+      sh.className='section-head';
+      sh.innerHTML=`<span class="section-head-label">The Final Test</span>`;
+      wrap.appendChild(sh);
+    }
+
+    const unlocked=isUnlocked(lvl);
+    const best=getBest(lvl.id);
+    const completed=best>0;
+    const beatPar = completed && lvl.par && best <= lvl.par;
+    const parHtml = lvl.par ? `<div class="par-badge${beatPar?' beat':''}">Par: ${lvl.par}s${beatPar?' ✓':''}</div>` : '';
+
+    const card=document.createElement('button');
+    card.className='level-card'+(lvl.isLockIn?' card-lockin':'')+(unlocked?'':' locked');
+
+    const bestHtml=completed
+      ?`<div class="card-best">⏱ <span class="t">${fmt(best)}</span></div>`
+      :`<div class="card-best" style="color:var(--muted);font-size:0.68rem;">Not yet played</div>`;
+
+    const rightHtml=unlocked
+      ?`<div class="card-right">
+          <div class="card-cta">${lvl.isLockIn?'Lock In →':'Play →'}</div>
+          ${lvl.free?'<div class="card-free">Free</div>':''}
+        </div>`
+      :`<div class="card-right"><div class="card-lock">🔒</div></div>`;
+
+    card.innerHTML=`
+      <div class="card-stripe" style="background:${lvl.stripe}"></div>
+      <div class="card-body">
+        <div class="card-emoji">${lvl.emoji}</div>
+        <div class="card-info">
+          <div class="card-name">${lvl.name}</div>
+          <div class="card-sub">${lvl.sub}</div>
+          ${unlocked?bestHtml+'<div>'+parHtml+'</div>':'<div style="font-size:0.68rem;color:var(--muted);font-weight:700;margin-top:4px;">Unlock to play</div>'}
+        </div>
+        ${rightHtml}
+      </div>`;
+
+    card.onclick=unlocked
+      ?()=>startLevel(lvl)
+      :()=>openPayModal();
+
+    wrap.appendChild(card);
+  });
+
+  const ft=document.createElement('div');
+  ft.className='footer-copy';
+  ft.textContent='Turbo Holiday · Imagination and Perseverance';
+  wrap.appendChild(ft);
+}
+
+// ═══════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════
+const G={lvl:null,round:[],idx:0,correct:0,startMs:0,timerInt:null,penTotal:0,mistakes:[],accepting:true,isTsMode:false,tsQ:null,recog:null,listening:false};
+
+function startLevel(lvl){
+  G.lvl=lvl;
+  const pool=buildPool(lvl);
+  G.round=shuffle(pool).slice(0,10);
+  G.idx=0;G.correct=0;G.penTotal=0;G.mistakes=[];
+  G.startMs=performance.now();G.accepting=true;
+  G.isTsMode=!!lvl.isLockIn;
+  clearInterval(G.timerInt);
+  showView('game-view');
+  document.getElementById('gameTopic').textContent=lvl.emoji+' '+lvl.name;
+  document.getElementById('statScore').textContent='0';
+  document.getElementById('backBtn').onclick=()=>{clearInterval(G.timerInt);stopMic();showView('home-view');renderHome();};
+  G.timerInt=setInterval(()=>{const el=document.getElementById('statTimer');if(el){const t=((performance.now()-G.startMs)/1000)+G.penTotal;el.textContent=t.toFixed(1)+'s';}},100);
+  toneStart();renderQ();
+}
+
+function renderQ(){
+  const q=G.round[G.idx];
+  document.getElementById('progressBar').style.width=(G.idx/10*100)+'%';
+  document.getElementById('qText').textContent=q.en;
+  document.getElementById('feedbackRow').innerHTML='';
+  if(G.isTsMode){showTs(q);}else{showMc(q);}
+}
+
+function showMc(q){
+  document.getElementById('qLabel').textContent='Say it in Spanish →';
+  document.getElementById('mcSection').style.display='block';
+  document.getElementById('tsBox').classList.remove('active');
+  const pool=buildPool(G.lvl);
+  const others=shuffle(pool.filter(p=>p.es!==q.es)).slice(0,3).map(p=>p.es);
+  const opts=shuffle([q.es,...others]);
+  const grid=document.getElementById('answersGrid');grid.innerHTML='';
+  opts.forEach(o=>{const b=document.createElement('button');b.className='ans-btn';b.textContent=o;b.onclick=()=>handleMc(b,o,q);grid.appendChild(b);});
+  G.accepting=true;
+}
+
+function handleMc(btn,chosen,q){
+  if(!G.accepting)return;G.accepting=false;
+  document.querySelectorAll('.ans-btn').forEach(b=>{b.disabled=true;if(b.textContent===q.es)b.classList.add('correct');});
+  const ok=chosen===q.es;
+  const fb=document.getElementById('feedbackRow');
+  if(ok){
+    btn.classList.add('correct');G.correct++;document.getElementById('statScore').textContent=G.correct;
+    fb.innerHTML='<span class="fb-ok">✔ Correcto!</span>';
+    toneGood();setTimeout(()=>readES(q.es),400);
+  }else{
+    btn.classList.add('wrong');
+    fb.innerHTML=`<span class="fb-bad">✖ +${G.lvl.pen}s</span><div class="correct-reveal">→ ${q.es}</div>`;
+    toneBad();G.penTotal+=G.lvl.pen;G.mistakes.push({en:q.en,es:q.es,yours:chosen});
+    const tv=document.getElementById('statTimer');tv.classList.add('flash');setTimeout(()=>tv.classList.remove('flash'),400);
+  }
+  setTimeout(()=>{G.idx++;G.idx>=10?finishLevel():(renderQ(),G.accepting=true);},1200);
+}
+
+function showTs(q){
+  document.getElementById('qLabel').textContent='Type or speak in Spanish →';
+  document.getElementById('mcSection').style.display='none';
+  document.getElementById('tsBox').classList.add('active');
+  G.tsQ=q;
+  const inp=document.getElementById('tsInput');inp.value='';
+  document.getElementById('tsFb').textContent='';
+  document.getElementById('tsHint').textContent='Tap 🎤 to speak · Enter to submit';
+  G.accepting=true;setTimeout(()=>inp.focus(),100);
+}
+
+function submitTyped(){if(!G.accepting||!G.tsQ)return;const v=document.getElementById('tsInput').value.trim();if(!v)return;checkTs(v);}
+
+function checkTs(answer){
+  G.accepting=false;const q=G.tsQ;const ok=isClose(answer,q.es);
+  const fb=document.getElementById('tsFb');
+  if(ok){
+    fb.innerHTML=`<span class="fb-ok">✔ Correcto! — ${q.es}</span>`;
+    G.correct++;document.getElementById('statScore').textContent=G.correct;
+    toneGood();setTimeout(()=>readES(q.es),400);
+  }else{
+    fb.innerHTML=`<span class="fb-bad">✖ +${G.lvl.pen}s — ${q.es}</span>`;
+    toneBad();G.penTotal+=G.lvl.pen;G.mistakes.push({en:q.en,es:q.es,yours:answer});
+    const tv=document.getElementById('statTimer');tv.classList.add('flash');setTimeout(()=>tv.classList.remove('flash'),400);
+  }
+  setTimeout(()=>{stopMic();G.idx++;G.idx>=10?finishLevel():renderQ();},1300);
+}
+
+function toggleMic(){
+  if(G.listening){stopMic();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('tsHint').textContent='Speech not available — type instead.';return;}
+  const r=new SR();G.recog=r;r.lang='es-ES';r.interimResults=false;r.maxAlternatives=3;
+  r.onstart=()=>{G.listening=true;document.getElementById('tsMic').classList.add('on');document.getElementById('tsHint').textContent='Listening… speak now!';};
+  r.onend=()=>{G.listening=false;document.getElementById('tsMic').classList.remove('on');document.getElementById('tsHint').textContent='Tap 🎤 to speak';};
+  r.onerror=()=>{G.listening=false;document.getElementById('tsMic').classList.remove('on');document.getElementById('tsHint').textContent='Could not hear — try again or type';};
+  r.onresult=e=>{const alts=Array.from(e.results[0]).map(a=>a.transcript);const best=alts.find(t=>isClose(t,G.tsQ?.es))||alts[0];document.getElementById('tsInput').value=best;checkTs(best);};
+  r.start();
+}
+function stopMic(){if(G.recog){try{G.recog.stop();}catch(e){}G.recog=null;}G.listening=false;const m=document.getElementById('tsMic');if(m)m.classList.remove('on');}
+
+function finishLevel(){
+  clearInterval(G.timerInt);stopMic();
+  const raw=(performance.now()-G.startMs)/1000;
+  const total=raw+G.penTotal;
+  const lvl=G.lvl;
+  const oldBest=getBest(lvl.id);
+  const isNewBest=oldBest===0||total<oldBest;
+  if(isNewBest)setBest(lvl.id,total);
+
+  showView('results-view');
+  document.getElementById('rEmoji').textContent=G.correct===10?'🏆':G.correct>=7?'🎉':G.correct>=4?'👏':'😬';
+  document.getElementById('rTitle').textContent=isNewBest&&oldBest>0?'🏆 New Best!':G.correct===10?'Perfect!':'Round Complete';
+  document.getElementById('rTopic').textContent=lvl.emoji+' '+lvl.name;
+  document.getElementById('rScore').textContent=G.correct+'/10';
+  document.getElementById('rTime').textContent=fmt(total);
+
+  if(G.penTotal>0){document.getElementById('rPenBox').style.display='block';document.getElementById('rPen').textContent='+\'+G.penTotal+\'s';}
+  else document.getElementById('rPenBox').style.display='none';
+
+  const noteEl=document.getElementById('rNote');
+  if(isNewBest&&oldBest>0)noteEl.textContent=`⚡ ${(oldBest-total).toFixed(1)}s faster than before!`;
+  else if(oldBest>0&&!isNewBest)noteEl.textContent=`Your best: ${fmt(oldBest)} — can you beat it?`;
+  else noteEl.textContent=`First run: ${fmt(total)} — play again and go faster`;
+
+  if(G.correct===10){toneWin();confetti();}
+
+  const mb = document.getElementById('mistakesBox');
+  const ml = document.getElementById('mistakesList');
+  mb.style.display='block';
+  const mistakeSet = new Set(G.mistakes.map(m=>m.en));
+  ml.innerHTML = G.round.map(q=>{
+    const wrong = mistakeSet.has(q.en);
+    return `<div class="review-row ${wrong?'wrong':'correct'}">
+      <div class="review-icon">${wrong?'🔴':'🟢'}</div>
+      <div class="review-phrases">
+        <span class="review-en">${q.en}</span>
+        <span class="review-es">${q.es}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('rAgain').onclick=()=>startLevel(lvl);
+  document.getElementById('rHome').onclick=()=>{showView('home-view');renderHome();};
+
+  // Lock In 0 triggers paywall pop
+  if(lvl.id === 'lockin0' && G.correct >= 7){
+    setTimeout(()=>showPaywallBoom(), 900);
+    return;
+  }
+  // Other Lock In boom
+  if(lvl.isLockIn && G.correct >= 7){
+    const beltUnlocked = lvl.beltUnlock ? BELTS.find(b=>b.id===lvl.beltUnlock) : null;
+    setTimeout(()=>showBoom(lvl, beltUnlocked), 800);
+  }
+}
+
+function showView(id){
+  document.getElementById('home-view').style.display=id==='home-view'?'flex':'none';
+  document.getElementById('game-view').style.display=id==='game-view'?'block':'none';
+  document.getElementById('results-view').style.display=id==='results-view'?'block':'none';
+}
+
+
+
+function showPaywallBoom(){
+  confetti();
+  const overlay = document.getElementById('boomOverlay');
+  document.getElementById('boomBig').textContent = '🌞';
+  document.getElementById('boomTitle').textContent = 'You\'ve got it!';
+  document.getElementById('boomBelt').textContent = '';
+  document.getElementById('boomSub').textContent = 'Arrivals, Hotel, In Case — locked in.\nUnlock the full holiday for €0.99.';
+  overlay.classList.add('show');
+  toneWin();
+  document.getElementById('boomBtn').textContent = 'Unlock everything →';
+  document.getElementById('boomBtn').onclick = ()=>{
+    overlay.classList.remove('show');
+    showView('home-view');
+    renderHome();
+    setTimeout(()=>openPayModal(), 400);
+  };
+}
+
+function showBoom(lvl, belt){
+  confetti();
+  const overlay = document.getElementById('boomOverlay');
+  const beltMsgs = {
+    seeker: { big:'🌞', title:'Sun Seeker!', sub:'You\'ve arrived. You can order a drink, book in, and get around. You\'re on holiday.' },
+    local:  { big:'🍺', title:'The Local!',  sub:'Beach, shopping, food — you\'re not a tourist anymore. You belong here.' },
+    turbo:  { big:'🔥', title:'Turbo Holidaymaker!', sub:'Nights out, getting around, handling anything. You\'re unstoppable.' },
+    master: { big:'🏆', title:'Holiday Master!', sub:'Quick and clear. Every situation, every time. Spain is yours.' },
+  };
+  const msg = belt ? beltMsgs[belt.id] : {
+    big: lvl.emoji,
+    title: 'Locked In!',
+    sub: 'You produced it under pressure. That\'s the real thing.'
+  };
+  document.getElementById('boomBig').textContent = msg.big;
+  document.getElementById('boomTitle').textContent = msg.title;
+  document.getElementById('boomBelt').textContent = belt ? belt.emoji + ' ' + belt.title + ' unlocked' : '';
+  document.getElementById('boomSub').textContent = msg.sub;
+  overlay.classList.add('show');
+  toneWin();
+  document.getElementById('boomBtn').onclick = ()=>{
+    overlay.classList.remove('show');
+    renderHome();
+  };
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('tsInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitTyped();});
+});
+
+
+function openPayModal(){
+  const chips = PAID_CHIPS.map(c=>`<span class="pay-chip">${c}</span>`).join('');
+  document.getElementById('payChips').innerHTML = chips;
+  document.getElementById('payOverlay').classList.add('show');
+}
+function closePayModal(){
+  document.getElementById('payOverlay').classList.remove('show');
+}
+function doPurchase(){
+  alert('Coming to App Store and Google Play soon!');
+  closePayModal();
+}
+// Close on backdrop tap
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('payOverlay').addEventListener('click',e=>{
+    if(e.target===document.getElementById('payOverlay')) closePayModal();
+  });
+});
+
+renderHome();
+showView('home-view');
+</script>
+
+<!-- BOOM OVERLAY -->
+<div class="boom-overlay" id="boomOverlay">
+  <div class="boom-card">
+    <span class="boom-big" id="boomBig">🔒</span>
+    <div class="boom-title" id="boomTitle">Lock In!</div>
+    <div class="boom-belt" id="boomBelt"></div>
+    <div class="boom-sub" id="boomSub"></div>
+    <button class="boom-btn" id="boomBtn">Let's go! →</button>
+  </div>
+</div>
+
+<!-- PAY MODAL -->
+<div class="pay-overlay" id="payOverlay">
+  <div class="pay-sheet">
+    <div class="pay-handle"></div>
+    <span class="pay-sun">☀️</span>
+    <div class="pay-title">Ready for the full holiday?</div>
+    <div class="pay-sub">Unlock everything — bars, beaches, restaurants,<br>shopping, nights out, and all five Lock Ins.</div>
+    <div class="pay-chips" id="payChips"></div>
+    <div class="pay-price">€0.99 / £0.99</div>
+    <div class="pay-fine">One-off · No subscription · App Store &amp; Google Play</div>
+    <button class="pay-btn" onclick="doPurchase()">Unlock the full trip →</button>
+    <button class="pay-dismiss" onclick="closePayModal()">Maybe later</button>
+  </div>
+</div>
+</body>
+</html>
