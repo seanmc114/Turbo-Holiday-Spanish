@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Hola Turbo">
+<meta name="theme-color" content="#e07b00">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Hola Turbo ☀️</title>
+<style>
+:root{
+  --sun:#f5a623;--sun-deep:#e07b00;--terra:#c94f2c;--sky:#4ab8f5;
+  --sea:#1a9e8f;--blue:#1a47b8;--sand:#fff9ef;--ink:#1c1208;
+  --muted:#7a6a58;--shadow:rgba(28,18,8,0.10);--green:#22c55e;--red:#e03c2c;
+  --safe-top:env(safe-area-inset-top,0px);--safe-bot:env(safe-area-inset-bottom,0px);
+  --font-display:'Arial Rounded MT Bold','Trebuchet MS',system-ui,sans-serif;
+  --font-body:system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--sand);color:var(--ink);font-family:var(--font-body);overscroll-behavior:none;}
+
+/* ASYNC FONT LOAD */
+.app-shell{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* ATMOSPHERE */
+.sky-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,#87ceeb 0%,#b8e4f7 30%,#d8eefa 55%,#fff9ef 100%);}
+.sun-orb{position:fixed;top:calc(-55px + var(--safe-top));right:-35px;width:200px;height:200px;border-radius:50%;z-index:0;pointer-events:none;background:radial-gradient(circle at 38% 38%,#ffe877,#f5a623 55%,#e07b00);box-shadow:0 0 0 28px rgba(245,166,35,0.09),0 0 0 60px rgba(245,166,35,0.05);animation:sunpulse 5s ease-in-out infinite;}
+@keyframes sunpulse{0%,100%{box-shadow:0 0 0 28px rgba(245,166,35,0.09),0 0 0 60px rgba(245,166,35,0.05);}50%{box-shadow:0 0 0 40px rgba(245,166,35,0.13),0 0 0 85px rgba(245,166,35,0.07);}}
+.waves{position:fixed;bottom:0;left:0;right:0;height:72px;z-index:0;pointer-events:none;overflow:hidden;}
+.waves svg{position:absolute;bottom:0;width:200%;animation:waveDrift 10s linear infinite;}
+.waves svg:nth-child(2){animation-duration:14s;animation-delay:-5s;opacity:0.5;}
+@keyframes waveDrift{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.clouds{position:fixed;top:0;left:0;right:0;height:220px;z-index:0;pointer-events:none;overflow:hidden;}
+.cloud{position:absolute;background:white;border-radius:50px;opacity:0.8;animation:drift linear infinite;}
+.cloud::before,.cloud::after{content:'';position:absolute;background:white;border-radius:50%;}
+.c1{width:110px;height:32px;top:28px;animation-duration:70s;animation-delay:-5s;}.c1::before{width:52px;height:48px;top:-25px;left:14px;}.c1::after{width:40px;height:36px;top:-17px;left:50px;}
+.c2{width:80px;height:24px;top:68px;animation-duration:90s;animation-delay:-40s;opacity:0.55;}.c2::before{width:38px;height:34px;top:-18px;left:10px;}.c2::after{width:30px;height:26px;top:-13px;left:34px;}
+.c3{width:130px;height:36px;top:12px;animation-duration:115s;animation-delay:-65s;opacity:0.6;}.c3::before{width:62px;height:54px;top:-28px;left:18px;}.c3::after{width:48px;height:42px;top:-20px;left:62px;}
+@keyframes drift{from{transform:translateX(-220px);}to{transform:translateX(calc(100vw + 220px));}}
+
+/* HEADER */
+.app-header{padding:calc(var(--safe-top) + 12px) 20px 10px;text-align:center;flex-shrink:0;background:linear-gradient(180deg,rgba(135,206,235,0.5) 0%,transparent 100%);}
+.brand-hola{font-family:var(--font-display);font-size:clamp(18px,5vw,24px);color:var(--blue);letter-spacing:0.04em;display:block;line-height:1;}
+.brand-turbo{font-family:var(--font-display);font-size:clamp(40px,12vw,56px);line-height:0.85;color:var(--sun-deep);text-shadow:4px 4px 0 rgba(201,79,44,0.2);display:block;letter-spacing:-0.01em;}
+.tagline{font-size:13px;color:var(--muted);font-weight:700;margin-top:6px;display:block;}
+.belt-badge{display:inline-flex;align-items:center;gap:7px;background:white;border-radius:16px;padding:5px 12px;box-shadow:0 2px 10px var(--shadow);margin-top:8px;border-left:3px solid var(--sun-deep);}
+.belt-emoji{font-size:1.1rem;}
+.belt-title{font-family:var(--font-display);font-size:0.88rem;color:var(--ink);}
+
+/* SCROLL */
+.app-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:0 14px calc(var(--safe-bot) + 80px);}
+
+/* SECTION HEADS */
+.section-head{display:flex;align-items:center;gap:10px;margin:20px 0 8px;}
+.section-label{font-size:9px;font-weight:900;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.section-head::after{content:'';flex:1;height:2px;background:linear-gradient(to right,rgba(26,71,184,0.12),transparent);border-radius:2px;}
+
+/* LEVEL CARDS */
+.level-card{background:white;border-radius:16px;border:none;text-align:left;cursor:pointer;width:100%;padding:0;overflow:hidden;box-shadow:0 3px 14px var(--shadow);transition:transform 0.12s;margin-bottom:8px;display:block;-webkit-appearance:none;}
+.level-card:active{transform:scale(0.975);}
+.level-card.locked{opacity:0.6;}
+.card-stripe{height:4px;}
+.card-body{padding:12px 14px;display:flex;align-items:center;gap:12px;}
+.card-emoji{font-size:1.75rem;flex-shrink:0;line-height:1;}
+.card-info{flex:1;min-width:0;}
+.card-name{font-family:var(--font-display);font-size:1rem;color:var(--ink);line-height:1.1;}
+.card-sub{font-size:0.67rem;color:var(--muted);font-weight:700;margin-top:2px;}
+.card-meta{display:flex;align-items:center;gap:8px;margin-top:5px;flex-wrap:wrap;}
+.card-best{font-size:0.72rem;font-weight:800;color:var(--blue);}
+.card-par{font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:6px;background:rgba(201,79,44,0.08);color:var(--terra);}
+.card-par.beat{background:rgba(34,197,94,0.10);color:var(--green);}
+.card-right{flex-shrink:0;}
+.card-cta{font-family:var(--font-display);font-size:0.9rem;color:var(--sun-deep);}
+.card-lock{font-size:1.2rem;}
+
+.card-stars{font-size:0.85rem;letter-spacing:0.05em;display:block;margin-top:3px;}
+.card-free-badge{background:var(--green);color:white;font-size:8px;font-weight:900;letter-spacing:0.1em;padding:2px 6px;border-radius:6px;text-transform:uppercase;display:block;margin-top:3px;}
+.proveit-card .card-name{color:var(--terra);}
+
+/* PAY MODAL */
+.pay-overlay{position:fixed;inset:0;z-index:300;background:rgba(28,18,8,0.6);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.25s;}
+.pay-overlay.show{opacity:1;pointer-events:all;}
+.pay-sheet{background:white;border-radius:24px 24px 0 0;width:100%;max-width:480px;padding:24px 20px calc(20px + var(--safe-bot));transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.34,1.2,0.64,1);}
+.pay-overlay.show .pay-sheet{transform:translateY(0);}
+.pay-handle{width:40px;height:4px;background:rgba(0,0,0,0.12);border-radius:4px;margin:0 auto 18px;}
+.pay-sun{font-size:2rem;display:block;margin-bottom:6px;text-align:center;}
+.pay-title{font-family:var(--font-display);font-size:1.5rem;color:var(--sun-deep);text-align:center;margin-bottom:4px;}
+.pay-sub{font-size:0.8rem;color:var(--muted);font-weight:700;line-height:1.6;margin-bottom:12px;text-align:center;}
+.pay-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin-bottom:14px;}
+.pay-chip{background:var(--sand);border-radius:16px;padding:4px 10px;font-size:0.72rem;font-weight:800;color:var(--ink);}
+.pay-price{font-family:var(--font-display);font-size:1.5rem;color:var(--blue);text-align:center;margin-bottom:2px;}
+.pay-fine{font-size:0.68rem;color:var(--muted);font-weight:700;text-align:center;margin-bottom:16px;}
+.pay-btn{display:block;width:100%;background:linear-gradient(135deg,var(--sun-deep),var(--terra));color:white;border:none;border-radius:14px;font-family:var(--font-display);font-size:1.1rem;padding:15px;cursor:pointer;box-shadow:0 5px 18px rgba(224,123,0,0.28);}
+.pay-dismiss{display:block;width:100%;background:none;border:none;font-family:var(--font-body);font-size:0.8rem;font-weight:700;color:var(--muted);padding:10px;cursor:pointer;text-align:center;}
+
+/* BOOM OVERLAY */
+.boom-overlay{position:fixed;inset:0;z-index:200;background:rgba(28,18,8,0.6);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.boom-overlay.show{opacity:1;pointer-events:all;}
+.boom-card{background:white;border-radius:28px;padding:36px 24px 28px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);transform:scale(0.7);transition:transform 0.45s cubic-bezier(0.34,1.56,0.64,1);max-width:320px;width:90%;}
+.boom-overlay.show .boom-card{transform:scale(1);}
+.boom-big{font-size:4rem;display:block;margin-bottom:6px;}
+.boom-title{font-family:var(--font-display);font-size:1.9rem;color:var(--sun-deep);margin-bottom:4px;}
+.boom-belt{font-family:var(--font-display);font-size:1.2rem;margin:8px 0;}
+.boom-sub{font-size:0.84rem;color:var(--muted);font-weight:700;margin-bottom:20px;line-height:1.5;}
+.boom-btn{background:linear-gradient(135deg,var(--sun-deep),var(--terra));color:white;border:none;border-radius:14px;font-family:var(--font-display);font-size:1.1rem;padding:14px 32px;cursor:pointer;width:100%;}
+
+/* GAME */
+#game-view{display:none;position:fixed;inset:0;z-index:10;background:var(--sand);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.game-inner{max-width:480px;margin:0 auto;padding:calc(var(--safe-top) + 14px) 14px calc(var(--safe-bot) + 24px);}
+.game-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.back-btn{background:var(--sun-deep);border:none;color:white;border-radius:50%;width:40px;height:40px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.game-topic{font-family:var(--font-display);font-size:1rem;color:var(--ink);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.stat-box{background:white;border-radius:10px;padding:5px 10px;text-align:center;box-shadow:0 2px 8px var(--shadow);}
+.stat-val{font-family:var(--font-display);font-size:1.15rem;color:var(--blue);display:block;}
+.stat-val.flash{animation:flashRed 0.35s ease;}
+@keyframes flashRed{0%,100%{color:var(--blue);}50%{color:var(--red);}}
+.stat-label{font-size:0.55rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;}
+.progress-wrap{background:rgba(0,0,0,0.06);border-radius:10px;height:5px;margin-bottom:14px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--sun),var(--sky));border-radius:10px;transition:width 0.3s;}
+
+/* QUESTION CARD */
+.q-card{background:white;border-radius:18px;overflow:hidden;margin-bottom:12px;box-shadow:0 5px 18px var(--shadow);}
+.q-stripe{height:4px;background:linear-gradient(90deg,var(--sun-deep),var(--sky));}
+.q-body{padding:18px 16px 14px;text-align:center;}
+.q-label{font-size:0.62rem;font-weight:800;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.q-english{font-family:var(--font-display);font-size:clamp(1.3rem,5vw,1.75rem);color:var(--ink);margin-bottom:8px;line-height:1.2;}
+.q-read{background:none;border:1.5px solid rgba(26,71,184,0.15);border-radius:16px;color:var(--blue);font-size:0.74rem;font-weight:700;padding:4px 12px;cursor:pointer;}
+
+/* MC */
+.answers-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.ans-btn{background:white;border:2px solid rgba(0,0,0,0.07);border-radius:12px;color:var(--ink);font-family:var(--font-body);font-size:0.83rem;font-weight:700;padding:13px 6px;cursor:pointer;text-align:center;line-height:1.25;box-shadow:0 2px 8px var(--shadow);}
+.ans-btn:active{transform:scale(0.97);}
+.ans-btn.correct{background:#e8faf0;border-color:var(--green);color:#166534;}
+.ans-btn.wrong{background:#fef2f2;border-color:var(--red);color:var(--red);}
+.ans-btn:disabled{cursor:default;}
+.feedback-row{text-align:center;min-height:34px;font-family:var(--font-display);font-size:1.05rem;margin-bottom:4px;}
+.fb-ok{color:var(--green);}
+.fb-bad{color:var(--red);}
+.correct-reveal{font-size:0.85rem;color:var(--ink);font-family:var(--font-body);font-weight:800;margin-top:3px;}
+
+/* TYPE/SAY */
+.ts-box{background:white;border-radius:16px;padding:14px;box-shadow:0 3px 14px var(--shadow);margin-bottom:12px;display:none;}
+.ts-box.active{display:block;}
+.ts-label{font-size:0.62rem;font-weight:800;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.ts-input{width:100%;border:2px solid rgba(0,0,0,0.10);border-radius:10px;font-family:var(--font-body);font-size:1rem;font-weight:700;padding:12px 14px;color:var(--ink);background:var(--sand);outline:none;transition:border-color 0.15s;margin-bottom:8px;display:block;}
+.ts-input:focus{border-color:var(--blue);}
+.ts-btns{display:flex;gap:8px;}
+.ts-mic{background:var(--terra);color:white;border:none;border-radius:10px;font-size:1.2rem;padding:12px 16px;cursor:pointer;flex-shrink:0;}
+.ts-mic.on{background:var(--red);animation:micpulse 0.8s ease-in-out infinite;}
+@keyframes micpulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+.ts-go{flex:1;background:var(--blue);color:white;border:none;border-radius:10px;font-family:var(--font-display);font-size:1.05rem;padding:12px;cursor:pointer;}
+.ts-hint{font-size:0.68rem;color:var(--muted);font-weight:700;margin-top:6px;text-align:center;}
+.ts-fb{text-align:center;font-family:var(--font-display);font-size:1rem;margin-top:6px;min-height:24px;}
+
+/* RESULTS */
+#results-view{display:none;position:fixed;inset:0;z-index:11;background:var(--sand);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.results-inner{max-width:480px;margin:0 auto;padding:calc(var(--safe-top) + 14px) 14px calc(var(--safe-bot) + 32px);}
+.results-card{background:white;border-radius:20px;overflow:hidden;box-shadow:0 6px 24px var(--shadow);}
+.results-stripe{height:5px;background:linear-gradient(90deg,var(--sun-deep),var(--sky),var(--sea));}
+.results-body{padding:22px 18px;text-align:center;}
+.r-emoji{font-size:2.8rem;display:block;margin-bottom:8px;}
+.r-title{font-family:var(--font-display);font-size:1.7rem;color:var(--ink);margin-bottom:3px;}
+.r-topic{color:var(--muted);font-size:0.78rem;font-weight:700;margin-bottom:14px;}
+.r-stats{display:flex;justify-content:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.r-stat{background:var(--sand);border-radius:12px;padding:10px 14px;text-align:center;}
+.r-stat-val{font-family:var(--font-display);font-size:1.5rem;color:var(--blue);display:block;}
+.r-stat-val.pen{color:var(--red);}
+.r-stat-label{font-size:0.6rem;font-weight:800;color:var(--muted);text-transform:uppercase;}
+.r-note{font-size:0.78rem;font-weight:700;color:var(--terra);margin-bottom:14px;min-height:1.2em;}
+.btn-primary{background:linear-gradient(135deg,var(--sun-deep),var(--terra));color:white;border:none;border-radius:12px;font-family:var(--font-display);font-size:1.05rem;padding:13px 24px;cursor:pointer;display:inline-block;margin:3px;}
+.btn-ghost{background:white;color:var(--blue);border:2px solid rgba(26,71,184,0.18);border-radius:12px;font-family:var(--font-display);font-size:0.95rem;padding:12px 20px;cursor:pointer;display:inline-block;margin:3px;}
+
+/* REVIEW LIST */
+.review-box{background:white;border-radius:16px;overflow:hidden;margin-top:14px;box-shadow:0 3px 14px var(--shadow);}
+.review-head{padding:12px 16px 10px;border-bottom:1px solid rgba(0,0,0,0.06);}
+.review-head h3{font-family:var(--font-display);font-size:1.05rem;color:var(--ink);margin:0;}
+.review-head p{font-size:0.65rem;font-weight:800;color:var(--muted);margin-top:2px;}
+.review-row{display:flex;align-items:center;border-bottom:1px solid rgba(0,0,0,0.05);padding:10px 14px;gap:10px;}
+.review-row:last-child{border-bottom:none;}
+.review-icon{font-size:1rem;flex-shrink:0;width:22px;text-align:center;}
+.review-phrases{flex:1;min-width:0;}
+.review-en{font-size:0.72rem;color:var(--muted);font-weight:700;display:block;margin-bottom:2px;}
+.review-es{font-family:var(--font-display);font-size:0.98rem;color:var(--ink);display:block;line-height:1.2;}
+.review-row.wrong .review-es{color:var(--terra);}
+.review-row.correct .review-es{color:var(--sea);}
+
+.footer-copy{text-align:center;font-size:10px;font-weight:700;color:rgba(28,18,8,0.22);letter-spacing:0.04em;padding:18px 0 6px;}
+@keyframes riseUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<script>
+(function(){var l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family=Boogaloo&family=Nunito:wght@400;700;800;900&display=swap';document.head.appendChild(l);})();
+</script>
+
+<div class="sky-bg"></div>
+<div class="sun-orb"></div>
+<div class="clouds"><div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div></div>
+<div class="waves">
+  <svg viewBox="0 0 1440 72" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,36 C180,72 360,0 540,36 C720,72 900,0 1080,36 C1260,72 1440,36 1440,36 L1440,72 L0,72 Z" fill="rgba(74,184,245,0.32)"/></svg>
+  <svg viewBox="0 0 1440 72" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,48 C240,0 480,72 720,48 C960,24 1200,72 1440,48 L1440,72 L0,72 Z" fill="rgba(26,158,143,0.20)"/></svg>
+</div>
+
+<div class="app-shell" id="home-view">
+  <header class="app-header">
+    <svg viewBox="0 0 300 92" xmlns="http://www.w3.org/2000/svg" style="width:230px;height:auto;display:block;margin:0 auto;">
+  <defs>
+    <filter id="spray" x="-8%" y="-15%" width="116%" height="130%">
+      <feTurbulence type="turbulence" baseFrequency="0.80" numOctaves="4" seed="7" result="noise"/>
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e07b00"/>
+      <stop offset="70%" stop-color="#f5a623" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#f5a623" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- Sun -->
+  <circle cx="20" cy="36" r="12" fill="#f5a623"/>
+  <g stroke="#f5a623" stroke-width="1.8" stroke-linecap="round">
+    <line x1="20" y1="18" x2="20" y2="13"/>
+    <line x1="20" y1="54" x2="20" y2="59"/>
+    <line x1="2"  y1="36" x2="-2" y2="36"/>
+    <line x1="38" y1="36" x2="43" y2="36"/>
+    <line x1="7"  y1="23" x2="3"  y2="19"/>
+    <line x1="33" y1="49" x2="37" y2="53"/>
+    <line x1="33" y1="23" x2="37" y2="19"/>
+    <line x1="7"  y1="49" x2="3"  y2="53"/>
+  </g>
+  <!-- HOLA -->
+  <text x="48" y="26"
+    font-family="'Arial Rounded MT Bold','Trebuchet MS',sans-serif"
+    font-size="21" font-weight="900" fill="#1a47b8" letter-spacing="4">HOLA</text>
+  <!-- Crosshair line with arrow — echoes the icon -->
+  <line x1="44" y1="36" x2="271" y2="36" stroke="#e07b00" stroke-width="2.5" stroke-linecap="round"/>
+  <polygon points="282,36 268,30 268,42" fill="#e07b00"/>
+  <!-- TURBO — spray-paint stencil, italic, big -->
+  <text x="44" y="80"
+    font-family="'Arial Black','Impact','Arial Bold',sans-serif"
+    font-size="50" font-weight="900" font-style="italic"
+    fill="#e07b00" filter="url(#spray)"
+    letter-spacing="-2">TURBO</text>
+</svg>
+    <span class="tagline">Practice in private. Shine in public.</span>
+    <div style="text-align:center">
+      <div class="belt-badge" id="beltBadge">
+        <span class="belt-emoji" id="beltEmoji">🌱</span>
+        <span class="belt-title" id="beltTitle">Holiday Novice</span>
+      </div>
+    </div>
+  </header>
+  <div class="app-scroll"><div id="levels-wrap"></div></div>
+</div>
+
+<div id="game-view">
+  <div class="game-inner">
+    <div class="game-header">
+      <button class="back-btn" id="backBtn">←</button>
+      <div class="game-topic" id="gameTopic"></div>
+      <div class="stat-box"><span class="stat-val" id="statTimer">0.0s</span><span class="stat-label">time</span></div>
+      <div class="stat-box"><span class="stat-val" id="statScore">0</span><span class="stat-label">✓</span></div>
+    </div>
+    <div class="progress-wrap"><div class="progress-fill" id="progressBar" style="width:0%"></div></div>
+    <div class="q-card">
+      <div class="q-stripe"></div>
+      <div class="q-body">
+        <div class="q-label" id="qLabel">Which one? →</div>
+        <div class="q-english" id="qText"></div>
+        <button class="q-read" onclick="readQ()">🔊 Read aloud</button>
+      </div>
+    </div>
+    <div id="mcSection">
+      <div class="answers-grid" id="answersGrid"></div>
+      <div class="feedback-row" id="feedbackRow"></div>
+    </div>
+    <div class="ts-box" id="tsBox">
+      <div class="ts-label">Mistakes are free. Go fast.</div>
+      <input class="ts-input" id="tsInput" type="text" placeholder="Type in Spanish…" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div class="ts-btns">
+        <button class="ts-mic" id="tsMic" onclick="toggleMic()">🎤</button>
+        <button class="ts-go" onclick="submitTyped()">Next →</button>
+      </div>
+      <div class="ts-hint" id="tsHint">Tap 🎤 to speak · Enter to submit</div>
+      <div class="ts-fb" id="tsFb"></div>
+    </div>
+  </div>
+</div>
+
+<div id="results-view">
+  <div class="results-inner">
+    <div class="results-card">
+      <div class="results-stripe"></div>
+      <div class="results-body">
+        <span class="r-emoji" id="rEmoji">🎉</span>
+        <div class="r-title" id="rTitle"></div>
+        <div class="r-topic" id="rTopic"></div>
+        <div class="r-stats">
+          <div class="r-stat"><span class="r-stat-val" id="rScore"></span><span class="r-stat-label">correct</span></div>
+          <div class="r-stat"><span class="r-stat-val" id="rTime"></span><span class="r-stat-label">total time</span></div>
+          <div class="r-stat" id="rPenBox" style="display:none"><span class="r-stat-val pen" id="rPen"></span><span class="r-stat-label">penalty</span></div>
+        </div>
+        <div class="r-note" id="rNote"></div>
+        <button class="btn-primary" id="rNext" style="display:none">Next Level →</button>
+        <button class="btn-primary" id="rAgain">Go Again?</button>
+        <button class="btn-ghost" id="rHome">← Levels</button>
+        <div class="review-box" id="reviewBox" style="display:none">
+          <div class="review-head">
+            <h3 id="reviewTitle">Your 10 phrases</h3>
+            <p>🟢 got it · 🔴 learn it</p>
+          </div>
+          <div id="reviewList"></div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-copy">Hola Turbo · Imagination and Perseverance · © 2026</div>
+  </div>
+</div>
+
+<div class="boom-overlay" id="boomOverlay">
+  <div class="boom-card">
+    <span class="boom-big" id="boomBig">🎉</span>
+    <div class="boom-title" id="boomTitle"></div>
+    <div class="boom-belt" id="boomBelt"></div>
+    <div class="boom-sub" id="boomSub"></div>
+    <button class="boom-btn" id="boomBtn">Let\'s go! →</button>
+  </div>
+</div>
+
+<div class="pay-overlay" id="payOverlay">
+  <div class="pay-sheet">
+    <div class="pay-handle"></div>
+    <span class="pay-sun">☀️</span>
+    <div class="pay-title">Ready for the full trip?</div>
+    <div class="pay-sub">Unlock everything — every level, every topic,<br>bars, beaches, restaurants and more.</div>
+    <div class="pay-chips" id="payChips"></div>
+    <div class="pay-price">€0.99 / £0.99</div>
+    <div class="pay-fine">One-off · No subscription · App Store &amp; Google Play</div>
+    <button class="pay-btn" onclick="doPurchase()">Unlock the full trip →</button>
+    <button class="pay-dismiss" onclick="closePayModal()">Maybe later</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// PHRASE POOLS
+// Each topic has phrases in 3 tiers:
+// tier:1 = easy/short (levels 1-3)
+// tier:2 = medium (levels 4-6)
+// tier:3 = harder/longer (levels 7-8 + Prove It)
+// ═══════════════════════════════════════════════
+const POOLS = {
+
+arrivals:[
+  // tier 1 — signs and single words
+  {en:'Open',es:'Abierto',t:1},
+  {en:'Closed',es:'Cerrado',t:1},
+  {en:'Entrance',es:'Entrada',t:1},
+  {en:'Exit',es:'Salida',t:1},
+  {en:'Toilets',es:'Aseos',t:1},
+  {en:'Hello!',es:'¡Hola!',t:1},
+  {en:'Good morning!',es:'¡Buenos días!',t:1},
+  {en:'Good afternoon!',es:'¡Buenas tardes!',t:1},
+  {en:'Good night!',es:'¡Buenas noches!',t:1},
+  {en:'Goodbye!',es:'¡Adiós!',t:1},
+  {en:'Please',es:'Por favor',t:1},
+  {en:'Thank you',es:'Gracias',t:1},
+  {en:'Sorry',es:'Lo siento',t:1},
+  {en:'Yes',es:'Sí',t:1},
+  {en:'No',es:'No',t:1},
+  // tier 2 — short phrases
+  {en:'Excuse me',es:'Perdone',t:2},
+  {en:'Thank you very much',es:'Muchas gracias',t:2},
+  {en:'You are welcome',es:'De nada',t:2},
+  {en:'See you later!',es:'¡Hasta luego!',t:2},
+  {en:'How much is it?',es:'¿Cuánto cuesta?',t:2},
+  {en:'Can I pay by card?',es:'¿Puedo pagar con tarjeta?',t:2},
+  {en:'Where are the toilets?',es:'¿Dónde están los aseos?',t:2},
+  {en:'Where is the taxi?',es:'¿Dónde está el taxi?',t:2},
+  {en:'Where is the bus?',es:'¿Dónde está el autobús?',t:2},
+  {en:'Keep the change',es:'Quédese con el cambio',t:2},
+  {en:'I do not understand',es:'No entiendo',t:2},
+  {en:'Do you speak English?',es:'¿Habla inglés?',t:2},
+  {en:'More slowly please',es:'Más despacio por favor',t:2},
+  // tier 3 — full sentences
+  {en:'Here is my passport',es:'Aquí tiene mi pasaporte',t:3},
+  {en:'I am here on holiday',es:'Estoy aquí de vacaciones',t:3},
+  {en:'I have nothing to declare',es:'No tengo nada que declarar',t:3},
+  {en:'My suitcase has not arrived',es:'Mi maleta no ha llegado',t:3},
+  {en:'I need to report lost luggage',es:'Necesito reportar equipaje perdido',t:3},
+  {en:'Please stop here',es:'Para aquí por favor',t:3},
+  {en:'Take me to this address please',es:'Lléveme a esta dirección por favor',t:3},
+  {en:'How long does it take?',es:'¿Cuánto tiempo tarda?',t:3},
+  {en:'Is there a hotel shuttle?',es:'¿Hay un autobús del hotel?',t:3},
+  {en:'I need to change some money',es:'Necesito cambiar dinero',t:3},
+  // funny
+  {en:'My suitcase is enormous',es:'Mi maleta es enorme',t:2},
+  {en:'The queue is very long',es:'La cola es muy larga',t:2},
+],
+
+hotel:[
+  {en:'Hello!',es:'¡Hola!',t:1},
+  {en:'Good evening!',es:'¡Buenas noches!',t:1},
+  {en:'Thank you',es:'Gracias',t:1},
+  {en:'Please',es:'Por favor',t:1},
+  {en:'The key',es:'La llave',t:1},
+  {en:'The lift',es:'El ascensor',t:1},
+  {en:'The pool',es:'La piscina',t:1},
+  {en:'The restaurant',es:'El restaurante',t:1},
+  {en:'The reception',es:'La recepción',t:1},
+  {en:'The room',es:'La habitación',t:1},
+  {en:'Hot water',es:'Agua caliente',t:1},
+  {en:'Towels please',es:'Toallas por favor',t:1},
+  {en:'The bill please',es:'La cuenta por favor',t:1},
+  {en:'How much is it?',es:'¿Cuánto cuesta?',t:1},
+  {en:'Is there Wi-Fi?',es:'¿Hay Wi-Fi?',t:1},
+  {en:'I have a reservation',es:'Tengo una reserva',t:2},
+  {en:'Can I have the key?',es:'¿Me da la llave?',t:2},
+  {en:'What time is breakfast?',es:'¿A qué hora es el desayuno?',t:2},
+  {en:'Is breakfast included?',es:'¿Está el desayuno incluido?',t:2},
+  {en:'Can I pay by card?',es:'¿Puedo pagar con tarjeta?',t:2},
+  {en:'Is there a pool?',es:'¿Hay piscina?',t:2},
+  {en:'Is there parking?',es:'¿Hay aparcamiento?',t:2},
+  {en:'The shower is not working',es:'La ducha no funciona',t:2},
+  {en:'The TV is not working',es:'La televisión no funciona',t:2},
+  {en:'My key card does not work',es:'Mi tarjeta llave no funciona',t:2},
+  {en:'What time is check-out?',es:'¿A qué hora es el check-out?',t:3},
+  {en:'Can I have extra towels?',es:'¿Me puede dar más toallas?',t:3},
+  {en:'Can I leave my bags here?',es:'¿Puedo dejar mis maletas aquí?',t:3},
+  {en:'Can I change my room?',es:'¿Puedo cambiar de habitación?',t:3},
+  {en:'Can you wake me at seven?',es:'¿Me puede despertar a las siete?',t:3},
+  {en:'There is no hot water',es:'No hay agua caliente',t:3},
+  {en:'The air conditioning is not working',es:'El aire acondicionado no funciona',t:3},
+  {en:'Can you recommend a good restaurant?',es:'¿Puede recomendarme un buen restaurante?',t:3},
+  {en:'Is the hotel near the beach?',es:'¿Está el hotel cerca de la playa?',t:3},
+  {en:'I would like a room with a sea view',es:'Quisiera una habitación con vistas al mar',t:3},
+  // funny
+  {en:'The minibar is empty',es:'El minibar está vacío',t:2},
+  {en:'The bed is very small',es:'La cama es muy pequeña',t:2},
+  {en:'The room is very noisy',es:'La habitación tiene mucho ruido',t:2},
+],
+
+incase:[
+  {en:'Help!',es:'¡Socorro!',t:1},
+  {en:'Fire!',es:'¡Fuego!',t:1},
+  {en:'Stop thief!',es:'¡Al ladrón!',t:1},
+  {en:'Police',es:'Policía',t:1},
+  {en:'Hospital',es:'Hospital',t:1},
+  {en:'Pharmacy',es:'Farmacia',t:1},
+  {en:'I need help',es:'Necesito ayuda',t:1},
+  {en:'Call the police',es:'Llame a la policía',t:1},
+  {en:'Call a doctor',es:'Llame a un médico',t:1},
+  {en:'Call an ambulance',es:'Llame a una ambulancia',t:1},
+  {en:'I am ill',es:'Estoy enfermo',t:1},
+  {en:'I am in pain',es:'Tengo dolor',t:1},
+  {en:'I am lost',es:'Estoy perdido',t:1},
+  {en:'Can you help me?',es:'¿Puede ayudarme?',t:2},
+  {en:'I have been robbed',es:'Me han robado',t:2},
+  {en:'I have lost my passport',es:'He perdido mi pasaporte',t:2},
+  {en:'I have lost my wallet',es:'He perdido mi cartera',t:2},
+  {en:'Where is the hospital?',es:'¿Dónde está el hospital?',t:2},
+  {en:'Where is the pharmacy?',es:'¿Dónde está la farmacia?',t:2},
+  {en:'It is an emergency',es:'Es una emergencia',t:2},
+  {en:'Please hurry',es:'Dese prisa por favor',t:2},
+  {en:'I feel dizzy',es:'Estoy mareado',t:2},
+  {en:'I have an allergy',es:'Tengo alergia',t:2},
+  {en:'I cannot breathe',es:'No puedo respirar',t:3},
+  {en:'I am bleeding',es:'Estoy sangrando',t:3},
+  {en:'My bag has been stolen',es:'Me han robado el bolso',t:3},
+  {en:'I need to call my embassy',es:'Necesito llamar a mi embajada',t:3},
+  {en:'I take this medication',es:'Tomo este medicamento',t:3},
+  {en:'Please call the emergency services',es:'Por favor llame a los servicios de emergencia',t:3},
+  {en:'I have had an accident',es:'He tenido un accidente',t:3},
+  {en:'I have a high temperature',es:'Tengo fiebre alta',t:3},
+],
+
+bar:[
+  {en:'Hello!',es:'¡Hola!',t:1},
+  {en:'Please',es:'Por favor',t:1},
+  {en:'Thank you',es:'Gracias',t:1},
+  {en:'Cheers!',es:'¡Salud!',t:1},
+  {en:'A beer please',es:'Una cerveza por favor',t:1},
+  {en:'Two beers please',es:'Dos cervezas por favor',t:1},
+  {en:'A coffee please',es:'Un café por favor',t:1},
+  {en:'A water please',es:'Un agua por favor',t:1},
+  {en:'The bill please',es:'La cuenta por favor',t:1},
+  {en:'Keep the change',es:'Quédese con el cambio',t:1},
+  {en:'Is this table free?',es:'¿Está libre esta mesa?',t:1},
+  {en:'Same again please',es:'Lo mismo por favor',t:1},
+  {en:'It is my round',es:'Es mi ronda',t:2},
+  {en:'A white wine please',es:'Un vino blanco por favor',t:2},
+  {en:'A red wine please',es:'Un vino tinto por favor',t:2},
+  {en:'A gin and tonic please',es:'Un gin tonic por favor',t:2},
+  {en:'A caña please',es:'Una caña por favor',t:2},
+  {en:'Can we sit outside?',es:'¿Podemos sentarnos fuera?',t:2},
+  {en:'Is service included?',es:'¿Está el servicio incluido?',t:2},
+  {en:'What do you recommend?',es:'¿Qué recomienda?',t:2},
+  {en:'What tapas do you have?',es:'¿Qué tapas tienen?',t:2},
+  {en:'Can I pay separately?',es:'¿Puedo pagar por separado?',t:2},
+  {en:'A fresh orange juice please',es:'Un zumo de naranja natural por favor',t:3},
+  {en:'What is the Wi-Fi password?',es:'¿Cuál es la contraseña del Wi-Fi?',t:3},
+  {en:'Can we have some olives?',es:'¿Nos puede poner unas aceitunas?',t:3},
+  {en:'Do you have lager on tap?',es:'¿Tienen cerveza de barril?',t:3},
+  {en:'Could you bring some bread?',es:'¿Nos puede traer pan?',t:3},
+  {en:'A round of drinks please',es:'Una ronda de bebidas por favor',t:3},
+  {en:'Two glasses of house wine',es:'Dos copas de vino de la casa',t:3},
+  {en:'A coffee with milk please',es:'Un café con leche por favor',t:3},
+  // funny
+  {en:'The sangria was excellent',es:'La sangría estaba excelente',t:2},
+  {en:'One more and then we go',es:'Uno más y nos vamos',t:2},
+],
+
+restaurante:[
+  {en:'Hello!',es:'¡Hola!',t:1},
+  {en:'Please',es:'Por favor',t:1},
+  {en:'Thank you',es:'Gracias',t:1},
+  {en:'The menu please',es:'La carta por favor',t:1},
+  {en:'The bill please',es:'La cuenta por favor',t:1},
+  {en:'This is delicious',es:'Esto está delicioso',t:1},
+  {en:'This is excellent',es:'Esto está excelente',t:1},
+  {en:'Water please',es:'Agua por favor',t:1},
+  {en:'More bread please',es:'Más pan por favor',t:1},
+  {en:'A table for two please',es:'Una mesa para dos por favor',t:1},
+  {en:'I am vegetarian',es:'Soy vegetariano',t:2},
+  {en:'I am allergic to nuts',es:'Soy alérgico a los frutos secos',t:2},
+  {en:'What is the dish of the day?',es:'¿Cuál es el plato del día?',t:2},
+  {en:'What do you recommend?',es:'¿Qué recomienda usted?',t:2},
+  {en:'I would like the fish',es:'Quisiera el pescado',t:2},
+  {en:'I would like the steak',es:'Quisiera el filete',t:2},
+  {en:'Well done please',es:'Bien hecho por favor',t:2},
+  {en:'Medium please',es:'Al punto por favor',t:2},
+  {en:'Is service included?',es:'¿Está el servicio incluido?',t:2},
+  {en:'This is cold',es:'Esto está frío',t:2},
+  {en:'I did not order this',es:'Yo no pedí esto',t:3},
+  {en:'We will have the set menu',es:'Tomaremos el menú del día',t:3},
+  {en:'No dessert for me thank you',es:'Sin postre para mí gracias',t:3},
+  {en:'Can we pay separately?',es:'¿Podemos pagar por separado?',t:3},
+  {en:'A bottle of still water',es:'Una botella de agua sin gas',t:3},
+  {en:'Is this gluten free?',es:'¿Es esto sin gluten?',t:3},
+  {en:'I would like to book a table',es:'Quisiera reservar una mesa',t:3},
+  {en:'For eight o\'clock this evening',es:'Para las ocho esta noche',t:3},
+  {en:'Excuse me we have been waiting a long time',es:'Disculpe llevamos mucho tiempo esperando',t:3},
+  {en:'Could you turn down the music?',es:'¿Podría bajar la música?',t:3},
+  // funny
+  {en:'My sunburn is very bad',es:'Mi quemadura de sol es muy grave',t:2},
+  {en:'We are very hungry',es:'Tenemos mucha hambre',t:2},
+],
+
+playa:[
+  {en:'The beach',es:'La playa',t:1},
+  {en:'The sun',es:'El sol',t:1},
+  {en:'The sea',es:'El mar',t:1},
+  {en:'Hot!',es:'¡Calor!',t:1},
+  {en:'Beautiful!',es:'¡Precioso!',t:1},
+  {en:'Sunscreen please',es:'Crema solar por favor',t:1},
+  {en:'Towel please',es:'Una toalla por favor',t:1},
+  {en:'Is there a shower?',es:'¿Hay ducha?',t:1},
+  {en:'The water is lovely',es:'El agua está estupenda',t:1},
+  {en:'Is there a lifeguard?',es:'¿Hay socorrista?',t:1},
+  {en:'Is it safe to swim?',es:'¿Es seguro bañarse?',t:2},
+  {en:'Is there a beach bar?',es:'¿Hay un chiringuito?',t:2},
+  {en:'Can I hire a sun lounger?',es:'¿Puedo alquilar una tumbona?',t:2},
+  {en:'Can I hire an umbrella?',es:'¿Puedo alquilar una sombrilla?',t:2},
+  {en:'How much is a sun lounger?',es:'¿Cuánto cuesta una tumbona?',t:2},
+  {en:'Two sun loungers please',es:'Dos tumbonas por favor',t:2},
+  {en:'The flag is red today',es:'La bandera está roja hoy',t:2},
+  {en:'The sea is rough today',es:'El mar está agitado hoy',t:2},
+  {en:'The sunset is beautiful',es:'El atardecer es precioso',t:2},
+  {en:'Could you take our photo?',es:'¿Nos podría hacer una foto?',t:2},
+  {en:'Watch out for the current',es:'Cuidado con la corriente',t:3},
+  {en:'I have been stung by a jellyfish',es:'Me ha picado una medusa',t:3},
+  {en:'Where can I buy sunscreen?',es:'¿Dónde puedo comprar crema solar?',t:3},
+  {en:'Can I hire a paddleboard?',es:'¿Puedo alquilar una tabla de paddle surf?',t:3},
+  {en:'We are going for a swim',es:'Vamos a darnos un baño',t:3},
+  {en:'Let\'s find some shade',es:'Busquemos sombra',t:3},
+  {en:'The tide is coming in',es:'La marea está subiendo',t:3},
+  {en:'Put on your sunscreen',es:'Ponte la crema solar',t:3},
+  // funny
+  {en:'I am completely red',es:'Estoy completamente rojo',t:2},
+  {en:'I have lost my flip flops',es:'He perdido mis chanclas',t:2},
+  {en:'The sand is very hot',es:'La arena está muy caliente',t:1},
+],
+
+compras:[
+  {en:'How much is this?',es:'¿Cuánto cuesta esto?',t:1},
+  {en:'Cheap',es:'Barato',t:1},
+  {en:'Expensive',es:'Caro',t:1},
+  {en:'I will take it',es:'Me lo llevo',t:1},
+  {en:'Do you have change?',es:'¿Tiene cambio?',t:1},
+  {en:'Keep the change',es:'Quédese con el cambio',t:1},
+  {en:'Can I pay by card?',es:'¿Puedo pagar con tarjeta?',t:1},
+  {en:'Thank you',es:'Gracias',t:1},
+  {en:'Too expensive',es:'Demasiado caro',t:1},
+  {en:'I am just looking',es:'Solo estoy mirando',t:1},
+  {en:'Can I try this on?',es:'¿Me puedo probar esto?',t:2},
+  {en:'Do you have a larger size?',es:'¿Tiene una talla más grande?',t:2},
+  {en:'Do you have a smaller size?',es:'¿Tiene una talla más pequeña?',t:2},
+  {en:'Do you have this in red?',es:'¿Tiene esto en rojo?',t:2},
+  {en:'Do you have this in blue?',es:'¿Lo tiene en azul?',t:2},
+  {en:'Is there a discount?',es:'¿Hay algún descuento?',t:2},
+  {en:'It is a gift',es:'Es para regalo',t:2},
+  {en:'Where is the fitting room?',es:'¿Dónde está el probador?',t:2},
+  {en:'What time do you close?',es:'¿A qué hora cierran?',t:2},
+  {en:'I will think about it',es:'Lo voy a pensar',t:2},
+  {en:'Can I have a receipt?',es:'¿Me puede dar un recibo?',t:3},
+  {en:'I would like to return this',es:'Quisiera devolver esto',t:3},
+  {en:'It is faulty',es:'Está defectuoso',t:3},
+  {en:'Can you wrap it as a gift?',es:'¿Me lo puede envolver para regalo?',t:3},
+  {en:'Do you have anything cheaper?',es:'¿Tiene algo más barato?',t:3},
+  {en:'Can you recommend a souvenir?',es:'¿Puede recomendarme un recuerdo?',t:3},
+  {en:'Where can I find local crafts?',es:'¿Dónde puedo encontrar artesanía local?',t:3},
+  // funny
+  {en:'My wife wants everything',es:'Mi mujer lo quiere todo',t:2},
+  {en:'My husband said no',es:'Mi marido dijo que no',t:2},
+  {en:'I have no space in my suitcase',es:'No tengo espacio en la maleta',t:3},
+],
+
+transporte:[
+  {en:'Where is the bus?',es:'¿Dónde está el autobús?',t:1},
+  {en:'Where is the taxi?',es:'¿Dónde está el taxi?',t:1},
+  {en:'How much is it?',es:'¿Cuánto cuesta?',t:1},
+  {en:'Please stop here',es:'Para aquí por favor',t:1},
+  {en:'Keep the change',es:'Quédese con el cambio',t:1},
+  {en:'Turn left',es:'Gire a la izquierda',t:1},
+  {en:'Turn right',es:'Gire a la derecha',t:1},
+  {en:'Straight ahead',es:'Todo recto',t:1},
+  {en:'I am lost',es:'Estoy perdido',t:1},
+  {en:'I need a taxi',es:'Necesito un taxi',t:1},
+  {en:'Is this seat free?',es:'¿Está libre este asiento?',t:2},
+  {en:'What time is the next bus?',es:'¿A qué hora es el próximo autobús?',t:2},
+  {en:'Where does this bus go?',es:'¿Adónde va este autobús?',t:2},
+  {en:'How long does it take?',es:'¿Cuánto tiempo tarda?',t:2},
+  {en:'Is there a metro?',es:'¿Hay metro?',t:2},
+  {en:'Where is the train station?',es:'¿Dónde está la estación de tren?',t:2},
+  {en:'The bus is late',es:'El autobús lleva retraso',t:2},
+  {en:'I have missed my bus',es:'He perdido el autobús',t:2},
+  {en:'How far is it to walk?',es:'¿Está lejos a pie?',t:2},
+  {en:'Take me to this address',es:'Lléveme a esta dirección',t:2},
+  {en:'A single ticket please',es:'Un billete sencillo por favor',t:3},
+  {en:'A return ticket please',es:'Un billete de ida y vuelta por favor',t:3},
+  {en:'Can you tell me when to get off?',es:'¿Me puede decir cuándo bajarme?',t:3},
+  {en:'Is this the right bus for the beach?',es:'¿Es este el autobús para la playa?',t:3},
+  {en:'My car has broken down',es:'Mi coche se ha averiado',t:3},
+  {en:'I need a mechanic',es:'Necesito un mecánico',t:3},
+  {en:'Where can I park?',es:'¿Dónde puedo aparcar?',t:3},
+  // funny
+  {en:'The taxi driver got lost',es:'El taxista se perdió',t:2},
+  {en:'This is not the right stop',es:'Esta no es la parada correcta',t:2},
+],
+
+noche:[
+  {en:'Where is the bar?',es:'¿Dónde está el bar?',t:1},
+  {en:'Two beers please',es:'Dos cervezas por favor',t:1},
+  {en:'The bill please',es:'La cuenta por favor',t:1},
+  {en:'Cheers!',es:'¡Salud!',t:1},
+  {en:'Is there a nightclub?',es:'¿Hay una discoteca?',t:1},
+  {en:'What time does it open?',es:'¿A qué hora abre?',t:1},
+  {en:'What time does it close?',es:'¿A qué hora cierra?',t:1},
+  {en:'How much is entry?',es:'¿Cuánto cuesta la entrada?',t:1},
+  {en:'I want to go home',es:'Quiero irme a casa',t:1},
+  {en:'I need a taxi',es:'Necesito un taxi',t:1},
+  {en:'Is there a queue?',es:'¿Hay cola?',t:2},
+  {en:'Can we get a table?',es:'¿Podemos conseguir una mesa?',t:2},
+  {en:'A bottle of water please',es:'Una botella de agua por favor',t:2},
+  {en:'I lost my friends',es:'He perdido a mis amigos',t:2},
+  {en:'My phone is dead',es:'Mi teléfono se ha quedado sin batería',t:2},
+  {en:'Is there a smoking area?',es:'¿Hay zona de fumadores?',t:2},
+  {en:'Where is the nearest cash machine?',es:'¿Dónde está el cajero más cercano?',t:2},
+  {en:'What time is the last bus?',es:'¿A qué hora es el último autobús?',t:2},
+  {en:'I am not feeling well',es:'No me encuentro bien',t:2},
+  {en:'Can you call me a taxi?',es:'¿Puede llamarme un taxi?',t:3},
+  {en:'Is there a cloakroom?',es:'¿Hay guardarropa?',t:3},
+  {en:'Two vodka tonics please',es:'Dos vodka con tónica por favor',t:3},
+  {en:'We are looking for somewhere to eat',es:'Estamos buscando un sitio para comer',t:3},
+  {en:'Can I charge my phone here?',es:'¿Puedo cargar mi teléfono aquí?',t:3},
+  // funny
+  {en:'This music is very loud',es:'Esta música está muy alta',t:2},
+  {en:'I have lost my shoe',es:'He perdido mi zapato',t:2},
+  {en:'We are too old for this',es:'Somos demasiado mayores para esto',t:3},
+],
+
+};
+
+// ═══════════════════════════════════════════════
+// LEVEL STRUCTURE
+// 8 levels per topic + 1 Prove It level
+// Tiers phase in: levels 1-3 = tier1 only
+//                 levels 4-6 = tier1+2
+//                 levels 7-8 = all tiers
+//                 Prove It    = all tiers, type/speak
+// ═══════════════════════════════════════════════
+
+const BELTS=[
+  {id:'novice', emoji:'🌱', title:'Holiday Novice',     color:'#7a6a58', unlockedBy:null},
+  {id:'seeker', emoji:'🌞', title:'Sun Seeker',         color:'#f5a623', unlockedBy:'arrivals_proveit'},
+  {id:'local',  emoji:'🍺', title:'The Local',          color:'#22c55e', unlockedBy:'bar_proveit'},
+  {id:'turbo',  emoji:'🔥', title:'Turbo Holidaymaker', color:'#e07b00', unlockedBy:'transporte_proveit'},
+  {id:'master', emoji:'🏆', title:'Holiday Master',     color:'#1a47b8', unlockedBy:'noche_proveit'},
+];
+
+function getCurrentBelt(){
+  for(let i=BELTS.length-1;i>=0;i--){
+    const b=BELTS[i];
+    if(!b.unlockedBy)return b;
+    if(getBest(b.unlockedBy)>0)return b;
+  }
+  return BELTS[0];
+}
+
+// Topic definitions
+const TOPICS=[
+  {id:'arrivals',    emoji:'✈️', name:'Arrivals',      stripe:'linear-gradient(90deg,#4ab8f5,#1a47b8)', free:true,  beltOnSayIt:'seeker'},
+  {id:'hotel',       emoji:'🏨', name:'Hotel',         stripe:'linear-gradient(90deg,#f5a623,#e07b00)', free:true},
+  {id:'incase',      emoji:'🆘', name:'In Case',       stripe:'linear-gradient(90deg,#e03c2c,#c94f2c)', free:true},
+  {id:'bar',         emoji:'🍺', name:'Bars & Cafés',  stripe:'linear-gradient(90deg,#22c55e,#4ab8f5)', free:false, beltOnSayIt:'local'},
+  {id:'restaurante', emoji:'🍽️', name:'Restaurant',   stripe:'linear-gradient(90deg,#f5a623,#22c55e)', free:false},
+  {id:'playa',       emoji:'🏖️', name:'Beach',         stripe:'linear-gradient(90deg,#4ab8f5,#1a9e8f)', free:false},
+  {id:'compras',     emoji:'🛍️', name:'Shopping',      stripe:'linear-gradient(90deg,#c94f2c,#f5a623)', free:false},
+  {id:'transporte',  emoji:'🚌', name:'Getting Around',stripe:'linear-gradient(90deg,#1a47b8,#4ab8f5)', free:false, beltOnSayIt:'turbo'},
+  {id:'noche',       emoji:'🌙', name:'Nights Out',    stripe:'linear-gradient(90deg,#1a47b8,#c94f2c)', free:false, beltOnSayIt:'master'},
+];
+const EL_JEFE_TOPIC={id:'eljefe',emoji:'🇪🇸',name:'El Jefe',stripe:'linear-gradient(90deg,#1a47b8,#e07b00,#c94f2c)',free:false};
+
+// Build a level object for a topic + level number (1-8) + proveit
+function buildLevelId(topicId, lvlNum){ return topicId+'_'+lvlNum; }
+function buildSayItId(topicId){ return topicId+'_proveit'; }
+
+// Get phrases for a given topic level number
+// levels 1-3: tier 1 only
+// levels 4-6: tier 1+2
+// levels 7-8: all tiers
+function getPhrasesForLevel(topicId, lvlNum, strictTier){
+  const pool = POOLS[topicId]||[];
+  let allowed;
+  if(lvlNum<=3){
+    allowed=pool.filter(p=>p.t===1);
+    // strict — never pad into tier 2 for early levels or mini
+    if(strictTier) return allowed;
+  } else if(lvlNum<=6){
+    allowed=pool.filter(p=>p.t<=2);
+  } else {
+    allowed=pool;
+  }
+  if(allowed.length<10) allowed=pool.filter(p=>p.t<=2);
+  if(allowed.length<10) allowed=pool;
+  return allowed;
+}
+
+const PAID_CHIPS=['🍺 Bars','🍽️ Restaurant','🏖️ Beach','🛍️ Shopping','🚌 Transport','🌙 Nights Out','🔥 No Hints levels for all topics'];
+
+// Par times: boiling frog — slow squeeze, avg 6s drop per level
+const PAR_TIMES = [90, 87, 83, 78, 72, 65, 57, 48];
+function parForLevel(lvlNum){ return PAR_TIMES[lvlNum-1] || 48; }
+// Say It par reduces across topics as player progresses through the game
+const SAY_IT_PARS = [150,140,130,120,110,100,90,80,70];
+function getSayItPar(topicId){
+  const idx = TOPICS.findIndex(t=>t.id===topicId);
+  return SAY_IT_PARS[idx>=0?idx:0];
+}
+
+// ═══════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════
+const LS='ht4_';
+const lsGet=k=>{try{return localStorage.getItem(LS+k);}catch(e){return null;}};
+const lsSet=(k,v)=>{try{localStorage.setItem(LS+k,String(v));}catch(e){}};
+function getBest(id){const v=lsGet('b_'+id);return v?parseFloat(v):0;}
+function setBest(id,t){lsSet('b_'+id,t);}
+function isPaid(){return lsGet('paid')==='1';}
+function isTopicUnlocked(topic){return topic.free||isPaid();}
+
+// ═══════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function fmt(s){return s?s.toFixed(1)+'s':'—';}
+function norm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[¡!¿?.,;:]/g,'').trim();}
+function isClose(typed,correct){
+  const a=norm(typed),b=norm(correct);
+  if(a===b)return true;
+  const wa=a.split(/\s+/),wb=b.split(/\s+/);
+  let m=0;for(const w of wa)if(wb.includes(w))m++;
+  return m/wb.length>=0.72;
+}
+
+// ═══════════════════════════════════════════════
+// AUDIO
+// ═══════════════════════════════════════════════
+let _ac=null;
+function getAc(){if(!_ac)_ac=new(window.AudioContext||window.webkitAudioContext)();if(_ac.state==='suspended')_ac.resume();return _ac;}
+function tone(f,d,t,v,dl){try{const c=getAc(),now=c.currentTime+(dl||0),o=c.createOscillator(),g=c.createGain();o.type=t||'triangle';o.frequency.setValueAtTime(f,now);g.gain.setValueAtTime(0.0001,now);g.gain.exponentialRampToValueAtTime(v||0.03,now+0.01);g.gain.exponentialRampToValueAtTime(0.0001,now+d);o.connect(g);g.connect(getAc().destination);o.start(now);o.stop(now+d+0.02);}catch(e){}}
+function toneGood(){tone(660,.08,'triangle',.03,0);tone(880,.1,'triangle',.03,.08);}
+function toneBad(){tone(220,.1,'sawtooth',.02,0);tone(180,.14,'sawtooth',.02,.08);}
+function toneStart(){tone(392,.1,'triangle',.025,0);tone(523,.12,'triangle',.03,.08);}
+function toneWin(){tone(523,.08,'triangle',.03,0);tone(659,.08,'triangle',.03,.08);tone(784,.12,'triangle',.035,.16);}
+function readQ(){const u=new SpeechSynthesisUtterance(document.getElementById('qText').textContent);u.lang='en-GB';u.rate=0.90;speechSynthesis.cancel();speechSynthesis.speak(u);}
+function readES(txt){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='es-ES';u.rate=0.82;u.volume=0.85;speechSynthesis.speak(u);}
+
+// ═══════════════════════════════════════════════
+// CONFETTI
+// ═══════════════════════════════════════════════
+function confetti(){const cols=['#f5a623','#4ab8f5','#22c55e','#e03c2c','#1a47b8'];for(let i=0;i<30;i++){const p=document.createElement('div');p.style.cssText=`position:fixed;left:${Math.random()*100}vw;top:-20px;width:10px;height:14px;border-radius:3px;background:${cols[i%5]};z-index:9999;pointer-events:none;opacity:0.95;transform:rotate(${Math.random()*360}deg);transition:transform 1.6s ease-out,top 1.6s ease-out,opacity 1.6s ease-out;`;document.body.appendChild(p);requestAnimationFrame(()=>{p.style.top='105vh';p.style.transform=`translateX(${(Math.random()-.5)*180}px) rotate(${Math.random()*720}deg)`;p.style.opacity='0.04';});setTimeout(()=>p.remove(),1800);}}
+
+// Star thresholds — 5 stars
+// 5★ fluent under pressure, 4★ good, 3★ know it, 2★ trying, 1★ showed up
+function starsForTime(time, par){
+  if(time <= par * 0.55) return 5;
+  if(time <= par * 0.70) return 4;
+  if(time <= par * 0.85) return 3;
+  if(time <= par)        return 2;
+  return 1;
+}
+
+function starsHtml(stars){
+  if(!stars) return '';
+  const filled = '⭐'.repeat(stars);
+  const empty  = '☆'.repeat(5 - stars);
+  return `<span class="card-stars">${filled}${empty}</span>`;
+}
+
+// ── UNLOCK HELPERS ──
+function getUnlockedLevel(topicId){
+  // First level always unlocked
+  const v = lsGet('ul_'+topicId);
+  return v ? parseInt(v) : 1;
+}
+function setUnlockedLevel(topicId, lvl){
+  lsSet('ul_'+topicId, lvl);
+}
+function isLevelUnlocked(topicId, lvlNum){
+  if(lvlNum<=1) return true;
+  // mini (4.5) unlocked if level 4 is unlocked
+  if(lvlNum===4.5) return getUnlockedLevel(topicId)>=4;
+  // proveit (9) unlocked if level 8 done
+  if(lvlNum>=9) return getUnlockedLevel(topicId)>=8;
+  return getUnlockedLevel(topicId)>=lvlNum;
+}
+function isElJefeUnlocked(){
+  const best=getBest(buildSayItId('noche'));
+  return best>0&&best<=getSayItPar('noche');
+}
+
+// ═══════════════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════════════
+function renderHome(){
+  const belt=getCurrentBelt();
+  document.getElementById('beltEmoji').textContent=belt.emoji;
+  document.getElementById('beltTitle').textContent=belt.title;
+  document.getElementById('beltBadge').style.borderLeftColor=belt.color;
+
+  const wrap=document.getElementById('levels-wrap');
+  wrap.innerHTML='';
+
+  let shownPaywall=false;
+
+  TOPICS.forEach(topic=>{
+    const unlocked=isTopicUnlocked(topic);
+
+    // Section header
+    const sh=document.createElement('div');
+    sh.className='section-head';
+    sh.innerHTML=`<span class="section-label">${topic.emoji} ${topic.name}</span>`;
+    wrap.appendChild(sh);
+
+    // 8 drill levels
+    for(let lvl=1;lvl<=8;lvl++){
+      const id=buildLevelId(topic.id,lvl);
+      const best=getBest(id);
+      const par=parForLevel(lvl);
+      const beatPar=best>0&&best<=par;
+      const card=makeCard({
+        id, topic, unlocked,
+        name:`Level ${lvl}`,
+        sub:lvl<=3?'Short and easy':lvl<=6?'Building up':'Full phrases',
+        stripe:topic.stripe,
+        best, par, beatPar,
+        cta:'Play →',
+        isProveIt:false,
+        lvlNum:lvl
+      });
+      wrap.appendChild(card);
+
+      // Mini Lock In after level 4
+      if(lvl===4){
+        const miniId=topic.id+'_mini';
+        const miniBest=getBest(miniId);
+        const miniPar=90;
+        const miniBeatPar=miniBest>0&&miniBest<=miniPar;
+        const miniCard=makeCard({
+          id:miniId, topic, unlocked,
+          name:'Halfway Check',
+          sub:'Type or speak — 10 questions',
+          stripe:topic.stripe,
+          best:miniBest, par:miniPar, beatPar:miniBeatPar,
+          cta:'Let\'s go →',
+          isProveIt:true,
+          isMini:true,
+          lvlNum:4.5
+        });
+        wrap.appendChild(miniCard);
+      }
+    }
+
+    // Prove It level
+    const sayItId=buildSayItId(topic.id);
+    const sayItBest=getBest(sayItId);
+    const sayItPar=getSayItPar(topic.id);
+    const sayItBeatPar=sayItBest>0&&sayItBest<=sayItPar;
+    const sayCard=makeCard({
+      id:sayItId, topic, unlocked,
+      name:'No Hints',
+      sub:'Type or speak — all phrases',
+      stripe:topic.stripe,
+      best:sayItBest, par:sayItPar, beatPar:sayItBeatPar,
+      cta:'No Hints →',
+      isProveIt:true,
+      lvlNum:9
+    });
+    wrap.appendChild(sayCard);
+
+    // Insert paywall after free topics
+    if(topic.free && !shownPaywall){
+      const nextTopic=TOPICS[TOPICS.indexOf(topic)+1];
+      if(nextTopic&&!nextTopic.free){
+        shownPaywall=true;
+      }
+    }
+  });
+
+  // El Jefe — Boss Level
+  const elJefePar=180;
+  const elJefeBest=getBest('eljefe');
+  const elJefeBeatPar=elJefeBest>0&&elJefeBest<=elJefePar;
+  const elJefeAccess=isPaid();
+  const elJefeReady=isElJefeUnlocked();
+  const elJefeCard=document.createElement('button');
+  elJefeCard.className='level-card proveit-card'+(elJefeAccess&&elJefeReady?'':' locked');
+  const ejStars=elJefeBest>0?starsForTime(elJefeBest,elJefePar):0;
+  const ejBestHtml=elJefeBest>0
+    ?`${starsHtml(ejStars)}<span class="card-best">⏱ ${fmt(elJefeBest)}</span><span class="card-par${elJefeBeatPar?' beat':''}">par ${elJefePar}s</span>`
+    :`<span class="card-par">par ${elJefePar}s</span>`;
+  elJefeCard.innerHTML=`
+    <div class="card-stripe" style="background:${EL_JEFE_TOPIC.stripe}"></div>
+    <div class="card-body">
+      <div class="card-emoji">👑</div>
+      <div class="card-info">
+        <div class="card-name">El Jefe</div>
+        <div class="card-sub">All topics · All phrases · One shot</div>
+        <div class="card-meta">${elJefeAccess&&elJefeReady?ejBestHtml:elJefeAccess?'<span style="font-size:0.65rem;color:var(--muted);font-weight:800;">Beat Nights Out No Hints to unlock</span>':'<span style="font-size:0.65rem;color:var(--muted);font-weight:800;">Unlock full game to access</span>'}</div>
+      </div>
+      <div class="card-right"><div class="card-cta">${elJefeAccess&&elJefeReady?'El Jefe →':elJefeAccess?'🔒':'💳'}</div></div>
+    </div>`;
+  elJefeCard.onclick=elJefeAccess&&elJefeReady
+    ?()=>startLevel({id:'eljefe',topic:EL_JEFE_TOPIC,isProveIt:true,isElJefe:true,lvlNum:10,par:elJefePar})
+    :elJefeAccess?()=>{
+      document.getElementById('boomBig').textContent='🔒';
+      document.getElementById('boomTitle').textContent='Not yet!';
+      document.getElementById('boomBelt').textContent='';
+      document.getElementById('boomSub').textContent='Beat the Nights Out No Hints within par to unlock El Jefe.';
+      document.getElementById('boomOverlay').classList.add('show');
+      document.getElementById('boomBtn').textContent='Got it →';
+      document.getElementById('boomBtn').onclick=()=>document.getElementById('boomOverlay').classList.remove('show');
+    }
+    :()=>openPayModal();
+  wrap.appendChild(elJefeCard);
+
+  // Paywall at bottom
+  const pwWrap=document.createElement('div');
+  pwWrap.style.cssText='margin:20px 0 10px;';
+  pwWrap.innerHTML=`
+    <div style="background:white;border-radius:16px;padding:20px;text-align:center;box-shadow:0 3px 14px rgba(28,18,8,0.10);">
+      <div style="font-size:1.8rem;margin-bottom:6px;">☀️</div>
+      <div style="font-family:var(--font-display);font-size:1.3rem;color:var(--sun-deep);margin-bottom:4px;">Unlock everything</div>
+      <div style="font-size:0.78rem;color:var(--muted);font-weight:700;margin-bottom:12px;">Bars, Beach, Restaurant, Shopping,<br>Getting Around, Nights Out — all 9 topics,<br>8 levels each + No Hints. €0.99 forever.</div>
+      <button onclick="openPayModal()" style="background:linear-gradient(135deg,var(--sun-deep),var(--terra));color:white;border:none;border-radius:12px;font-family:var(--font-display);font-size:1rem;padding:13px 28px;cursor:pointer;width:100%;">Unlock for €0.99 / £0.99 →</button>
+    </div>`;
+  wrap.appendChild(pwWrap);
+
+  const ft=document.createElement('div');
+  ft.className='footer-copy';
+  ft.textContent='Hola Turbo · Imagination and Perseverance · © 2026';
+  wrap.appendChild(ft);
+}
+
+function makeCard({id,topic,unlocked,name,sub,stripe,best,par,beatPar,cta,isProveIt,isMini,lvlNum}){
+  const levelUnlocked = unlocked && isLevelUnlocked(topic.id, lvlNum);
+  const card=document.createElement('button');
+  card.className='level-card'+(isProveIt&&!isMini?' proveit-card':'')+(levelUnlocked?'':' locked');
+  const stars = best>0 ? starsForTime(best, par) : 0;
+  const bestHtml=best>0
+    ?`${starsHtml(stars)}<span class="card-best">⏱ ${fmt(best)}</span><span class="card-par${beatPar?' beat':''}">par ${par}s</span>`
+    :`<span class="card-par">par ${par}s</span>`;
+  const rightHtml=levelUnlocked
+    ?`<div class="card-right"><div class="card-cta">${cta}</div>${topic.free&&lvlNum<=1?'<div class="card-free-badge">Free</div>':''}</div>`
+    :`<div class="card-right"><div class="card-lock">${unlocked?'🔒':'💳'}</div></div>`;
+  card.innerHTML=`
+    <div class="card-stripe" style="background:${stripe}"></div>
+    <div class="card-body">
+      <div class="card-emoji">${isProveIt&&!isMini?'🔥':topic.emoji}</div>
+      <div class="card-info">
+        <div class="card-name">${name}</div>
+        <div class="card-sub">${sub}</div>
+        <div class="card-meta">${levelUnlocked?bestHtml:unlocked?'<span style="font-size:0.65rem;color:var(--muted);font-weight:800;">Beat previous level to unlock</span>':''}</div>
+      </div>
+      ${rightHtml}
+    </div>`;
+  card.onclick=levelUnlocked
+    ?()=>startLevel({id,topic,isProveIt,isMini:isMini||false,lvlNum,par})
+    :unlocked?()=>showLockedLevelMsg(topic,lvlNum)
+    :()=>openPayModal();
+  return card;
+}
+
+// ═══════════════════════════════════════════════
+// PAY MODAL
+// ═══════════════════════════════════════════════
+function openPayModal(){
+  document.getElementById('payChips').innerHTML=PAID_CHIPS.map(c=>`<span class="pay-chip">${c}</span>`).join('');
+  document.getElementById('payOverlay').classList.add('show');
+}
+function closePayModal(){document.getElementById('payOverlay').classList.remove('show');}
+function doPurchase(){alert('Coming to App Store and Google Play soon!');closePayModal();}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('payOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('payOverlay'))closePayModal();});
+  document.getElementById('tsInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitTyped();});
+});
+
+// ═══════════════════════════════════════════════
+// GAME STATE
+// ═══════════════════════════════════════════════
+const G={
+  level:null,round:[],idx:0,correct:0,
+  startMs:0,timerInt:null,penTotal:0,
+  mistakes:[],accepting:true,
+  recog:null,listening:false
+};
+
+function startLevel(level){
+  G.level=level;
+  let phrases;
+  if(level.isElJefe){
+    // Boss level: all topics, all tiers
+    phrases=TOPICS.flatMap(t=>POOLS[t.id]||[]);
+  } else {
+    const effectiveLvl = level.isMini ? 2 : level.lvlNum;
+    phrases=getPhrasesForLevel(level.topic.id,effectiveLvl,level.isMini);
+  }
+  const qCount = level.isElJefe ? 20 : level.isMini ? 5 : 10;
+  G.round=shuffle(phrases).slice(0,qCount);
+  G.idx=0;G.correct=0;G.penTotal=0;G.mistakes=[];
+  G.startMs=performance.now();G.accepting=true;
+  clearInterval(G.timerInt);
+  showView('game-view');
+  document.getElementById('gameTopic').textContent=level.isElJefe?'👑 El Jefe — Boss Level':level.topic.emoji+' '+level.topic.name+' — '+(level.isProveIt?'No Hints':'Level '+level.lvlNum);
+  document.getElementById('statScore').textContent='0';
+  document.getElementById('backBtn').onclick=()=>{clearInterval(G.timerInt);stopMic();showView('home-view');renderHome();};
+  G.timerInt=setInterval(()=>{const el=document.getElementById('statTimer');if(el){const t=((performance.now()-G.startMs)/1000)+G.penTotal;el.textContent=t.toFixed(1)+'s';}},100);
+  toneStart();
+  renderQ();
+}
+
+function renderQ(){
+  const q=G.round[G.idx];
+  document.getElementById('progressBar').style.width=(G.idx/G.round.length*100)+'%';
+  document.getElementById('qText').textContent=q.en;
+  document.getElementById('feedbackRow').innerHTML='';
+  if(G.level.isProveIt){showTs(q);}else{showMc(q);}
+}
+
+function showMc(q){
+  document.getElementById('qLabel').textContent='Which one? →';
+  document.getElementById('mcSection').style.display='block';
+  document.getElementById('tsBox').classList.remove('active');
+  const pool=POOLS[G.level.topic.id]||[];
+  const others=shuffle(pool.filter(p=>p.es!==q.es)).slice(0,3).map(p=>p.es);
+  const opts=shuffle([q.es,...others]);
+  const grid=document.getElementById('answersGrid');
+  grid.innerHTML='';
+  opts.forEach(o=>{const b=document.createElement('button');b.className='ans-btn';b.textContent=o;b.onclick=()=>handleMc(b,o,q);grid.appendChild(b);});
+  G.accepting=true;
+}
+
+function handleMc(btn,chosen,q){
+  if(!G.accepting)return;G.accepting=false;
+  document.querySelectorAll('.ans-btn').forEach(b=>{b.disabled=true;if(b.textContent===q.es)b.classList.add('correct');});
+  const ok=chosen===q.es;
+  const fb=document.getElementById('feedbackRow');
+  if(ok){
+    btn.classList.add('correct');G.correct++;document.getElementById('statScore').textContent=G.correct;
+    fb.innerHTML='<span class="fb-ok">✔ Correcto!</span>';
+    toneGood();setTimeout(()=>readES(q.es),350);
+  }else{
+    btn.classList.add('wrong');
+    fb.innerHTML=`<span class="fb-bad">✖ +${G.level.topic.id?30:30}s</span><div class="correct-reveal">→ ${q.es}</div>`;
+    toneBad();G.penTotal+=30;G.mistakes.push({en:q.en,es:q.es,yours:chosen});
+    document.getElementById('statTimer').classList.add('flash');setTimeout(()=>document.getElementById('statTimer').classList.remove('flash'),400);
+    setTimeout(()=>readES(q.es),450);
+  }
+  setTimeout(()=>{G.idx++;G.idx>=G.round.length?finishLevel():(renderQ(),G.accepting=true);},1100);
+}
+
+function showTs(q){
+  document.getElementById('qLabel').textContent='Mistakes are free. Go fast.';
+  document.getElementById('mcSection').style.display='none';
+  document.getElementById('tsBox').classList.add('active');
+  G.tsQ=q;
+  document.getElementById('tsInput').value='';
+  document.getElementById('tsFb').textContent='';
+  document.getElementById('tsHint').textContent='Tap 🎤 to speak · or type and press Enter';
+  G.accepting=true;
+  setTimeout(()=>document.getElementById('tsInput').focus(),100);
+}
+
+function submitTyped(){
+  if(!G.accepting||!G.tsQ)return;
+  const v=document.getElementById('tsInput').value.trim();
+  if(!v)return;checkTs(v);
+}
+
+function checkTs(answer){
+  G.accepting=false;const q=G.tsQ;const ok=isClose(answer,q.es);
+  const fb=document.getElementById('tsFb');
+  if(ok){
+    fb.innerHTML=`<span class="fb-ok">✔ Correcto! — ${q.es}</span>`;
+    G.correct++;document.getElementById('statScore').textContent=G.correct;
+    toneGood();setTimeout(()=>readES(q.es),350);
+  }else{
+    fb.innerHTML=`<span class="fb-bad">✖ +30s — ${q.es}</span>`;
+    toneBad();G.penTotal+=30;G.mistakes.push({en:q.en,es:q.es,yours:answer});
+    document.getElementById('statTimer').classList.add('flash');setTimeout(()=>document.getElementById('statTimer').classList.remove('flash'),400);
+    setTimeout(()=>readES(q.es),450);
+  }
+  stopMic();
+  setTimeout(()=>{G.idx++;G.idx>=G.round.length?finishLevel():renderQ();},1200);
+}
+
+function toggleMic(){
+  if(G.listening){stopMic();return;}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){
+    document.getElementById('tsHint').textContent='Speech not supported in this browser — type instead.';
+    return;
+  }
+  document.getElementById('tsHint').textContent='Starting…';
+  // Skip getUserMedia if mic already permitted — removes lag on repeat taps
+  if(navigator.permissions&&navigator.permissions.query){
+    navigator.permissions.query({name:'microphone'}).then(status=>{
+      if(status.state==='granted'){
+        startRecognition();
+      } else {
+        requestMicPermissionThenStart();
+      }
+    }).catch(()=>requestMicPermissionThenStart());
+  } else {
+    requestMicPermissionThenStart();
+  }
+}
+
+function requestMicPermissionThenStart(){
+  if(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+      stream.getTracks().forEach(t=>t.stop());
+      startRecognition();
+    }).catch(()=>{
+      document.getElementById('tsHint').textContent='Microphone permission denied — type instead.';
+    });
+  } else {
+    startRecognition();
+  }
+}
+
+function startRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  const r=new SR();
+  G.recog=r;
+  r.lang='es-ES';
+  r.interimResults=false;
+  r.maxAlternatives=5;
+  r.continuous=false;
+  r.onstart=()=>{
+    G.listening=true;
+    document.getElementById('tsMic').classList.add('on');
+    document.getElementById('tsHint').textContent='Listening… speak now!';
+  };
+  r.onend=()=>{
+    G.listening=false;
+    document.getElementById('tsMic').classList.remove('on');
+    document.getElementById('tsHint').textContent='Tap 🎤 to speak';
+  };
+  r.onerror=e=>{
+    G.listening=false;
+    document.getElementById('tsMic').classList.remove('on');
+    const msgs={
+      'not-allowed':'Microphone permission denied — check your phone settings.',
+      'no-speech':'Nothing heard — speak clearly, or try typing instead.',
+      'network':'Network needed for speech — type instead.',
+      'aborted':'Stopped.',
+    };
+    document.getElementById('tsHint').textContent=msgs[e.error]||'Could not hear — try again or type.';
+  };
+  r.onresult=e=>{
+    const alts=Array.from(e.results[0]).map(a=>a.transcript);
+    const best=alts.find(t=>isClose(t,G.tsQ?.es))||alts[0];
+    document.getElementById('tsInput').value=best;
+    checkTs(best);
+  };
+  try{ r.start(); }
+  catch(e){ document.getElementById('tsHint').textContent='Could not start mic — type instead.'; }
+}
+function stopMic(){if(G.recog){try{G.recog.stop();}catch(e){}G.recog=null;}G.listening=false;const m=document.getElementById('tsMic');if(m)m.classList.remove('on');}
+
+// ═══════════════════════════════════════════════
+// FINISH
+// ═══════════════════════════════════════════════
+function finishLevel(){
+  clearInterval(G.timerInt);stopMic();
+  const raw=(performance.now()-G.startMs)/1000;
+  const total=raw+G.penTotal;
+  const level=G.level;
+  const oldBest=getBest(level.id);
+  const isNewBest=oldBest===0||total<oldBest;
+  if(isNewBest)setBest(level.id,total);
+
+  showView('results-view');
+  document.getElementById('rEmoji').textContent=G.correct===10?'🏆':G.correct>=7?'🎉':G.correct>=4?'👏':'😬';
+  document.getElementById('rTitle').textContent=isNewBest&&oldBest>0?'🏆 New Best!':G.correct===10?'Perfect!':'Round Complete';
+  document.getElementById('rTopic').textContent=level.topic.emoji+' '+level.topic.name+(level.isProveIt?' — No Hints':' — Level '+level.lvlNum);
+  document.getElementById('rScore').textContent=G.correct+'/'+G.round.length;
+  document.getElementById('rTime').textContent=fmt(total);
+
+  if(G.penTotal>0){document.getElementById('rPenBox').style.display='block';document.getElementById('rPen').textContent='+'+G.penTotal+'s';}
+  else document.getElementById('rPenBox').style.display='none';
+
+  const noteEl=document.getElementById('rNote');
+  const beatPar=total<=level.par;
+
+  // Unlock next level if par beaten
+  if(beatPar && !level.isMini){
+    const currentUnlocked = getUnlockedLevel(level.topic.id);
+    const nextLvl = level.lvlNum>=9 ? 9 : Math.floor(level.lvlNum)+1;
+    if(nextLvl > currentUnlocked){
+      setUnlockedLevel(level.topic.id, nextLvl);
+    }
+  }
+
+  if(isNewBest&&oldBest>0)noteEl.textContent=`⚡ ${(oldBest-total).toFixed(1)}s faster — keep going!`;
+  else if(beatPar)noteEl.textContent=`✓ Par beaten — next level unlocked!`;
+  else if(oldBest>0&&!isNewBest)noteEl.textContent=`Best: ${fmt(oldBest)} — ${Math.ceil(oldBest-level.par)}s off par. Keep going.`;
+  else noteEl.textContent=`Par is ${level.par}s — beat it to unlock the next level`;
+
+  // Review phrases — update title for El Jefe
+  document.getElementById('reviewTitle').textContent=level.isElJefe?'Your 20 phrases':'Your 10 phrases';
+  document.getElementById('reviewBox').style.display='block';
+  const mistakeSet=new Set(G.mistakes.map(m=>m.en));
+  document.getElementById('reviewList').innerHTML=G.round.map(q=>{
+    const wrong=mistakeSet.has(q.en);
+    return `<div class="review-row ${wrong?'wrong':'correct'}">
+      <div class="review-icon">${wrong?'🔴':'🟢'}</div>
+      <div class="review-phrases">
+        <span class="review-en">${q.en}</span>
+        <span class="review-es">${q.es}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  if(G.correct===10){toneWin();confetti();}
+
+  // El Jefe special finish
+  if(level.isElJefe&&G.correct>=16){
+    setTimeout(()=>{
+      document.getElementById('boomBig').textContent='🇪🇸';
+      document.getElementById('boomTitle').textContent=beatPar?'El Jefe.':'Nearly there.';
+      document.getElementById('boomBelt').textContent='';
+      document.getElementById('boomSub').textContent=beatPar
+        ?'You\'re ready. Go to Spain.'
+        :`${G.correct}/20 — you know this. One more run.`;
+      document.getElementById('boomOverlay').classList.add('show');
+      if(beatPar){toneWin();confetti();}
+      document.getElementById('boomBtn').textContent=beatPar?'Vamos! →':'Go Again?';
+      document.getElementById('boomBtn').onclick=()=>{
+        document.getElementById('boomOverlay').classList.remove('show');
+        if(beatPar)renderHome();
+      };
+    },700);
+  }
+
+  // Mini Lock In boom — only fires when user taps a button, not automatically
+  if(level.isMini && G.correct>=4){
+    const showMiniBoom=()=>{
+      document.getElementById('boomBig').textContent='✅';
+      document.getElementById('boomTitle').textContent='Halfway there!';
+      document.getElementById('boomBelt').textContent='';
+      document.getElementById('boomSub').textContent='On track. Keep going — the second half is where it sticks.';
+      document.getElementById('boomOverlay').classList.add('show');
+      toneWin();
+      document.getElementById('boomBtn').textContent='Keep going →';
+      document.getElementById('boomBtn').onclick=()=>{
+        document.getElementById('boomOverlay').classList.remove('show');
+        showView('home-view'); renderHome();
+      };
+    };
+    // Override both result buttons to show boom first
+    document.getElementById('rAgain').textContent='Continue →';
+    document.getElementById('rAgain').onclick=()=>showMiniBoom();
+    document.getElementById('rHome').onclick=()=>showMiniBoom();
+  }
+
+  // Belt unlock on Prove It
+  if(level.isProveIt&&!level.isMini&&G.correct>=4&&level.topic.beltOnSayIt){
+    const belt=BELTS.find(b=>b.id===level.topic.beltOnSayIt);
+    if(belt)setTimeout(()=>showBoom(level,belt),700);
+  }
+
+  // Free Prove It → paywall boom
+  if(level.isProveIt&&level.topic.free&&G.correct>=7&&level.topic.id==='incase'){
+    setTimeout(()=>showPaywallBoom(),700);
+  }
+
+  document.getElementById('rAgain').onclick=()=>startLevel(level);
+  document.getElementById('rHome').onclick=()=>{showView('home-view');renderHome();};
+
+  // Next Level button — show when par beaten on a recognition level
+  const rNext=document.getElementById('rNext');
+  if(!level.isProveIt&&!level.isMini&&!level.isElJefe&&beatPar&&level.lvlNum<8){
+    const nextNum=level.lvlNum+1;
+    rNext.style.display='block';
+    rNext.textContent=`Level ${nextNum} →`;
+    rNext.onclick=()=>startLevel({
+      id:buildLevelId(level.topic.id,nextNum),
+      topic:level.topic,
+      isProveIt:false,
+      isMini:false,
+      lvlNum:nextNum,
+      par:parForLevel(nextNum)
+    });
+  } else {
+    rNext.style.display='none';
+  }
+}
+
+function showBoom(level,belt){
+  confetti();
+  const msgs={
+    seeker:{big:'🌞',sub:'You\'ve arrived. You can get through the airport, check in, and handle the basics. You\'re on holiday.'},
+    local: {big:'🍺',sub:'You can order, chat, and get what you want. You\'re not a tourist anymore. You belong here.'},
+    turbo: {big:'🔥',sub:'Getting around, shopping, out at night — you handle it all. Unstoppable.'},
+    master:{big:'🏆',sub:'Every situation, every time. Quick and clear. Spain is yours.'},
+  };
+  const msg=msgs[belt.id]||{big:'🎉',sub:'You proved it.'};
+  document.getElementById('boomBig').textContent=msg.big;
+  document.getElementById('boomTitle').textContent=belt.title+' unlocked!';
+  document.getElementById('boomBelt').textContent=belt.emoji+' '+belt.title;
+  document.getElementById('boomSub').textContent=msg.sub;
+  document.getElementById('boomOverlay').classList.add('show');
+  toneWin();
+  document.getElementById('boomBtn').textContent='Let\'s go! →';
+  document.getElementById('boomBtn').onclick=()=>{document.getElementById('boomOverlay').classList.remove('show');renderHome();};
+}
+
+
+function showLockedLevelMsg(topic, lvlNum){
+  const prevBest = getBest(buildLevelId(topic.id, lvlNum-1));
+  const par = parForLevel(lvlNum-1);
+  const diff = prevBest > 0 ? Math.ceil(prevBest - par) : null;
+  document.getElementById('boomBig').textContent = '🔒';
+  document.getElementById('boomTitle').textContent = 'Not yet!';
+  document.getElementById('boomBelt').textContent = '';
+  document.getElementById('boomSub').textContent = diff && diff > 0
+    ? `You need ${diff}s faster on Level ${lvlNum-1} to unlock this. You can do it.`
+    : `Beat the par time on Level ${lvlNum-1} to unlock this.`;
+  document.getElementById('boomOverlay').classList.add('show');
+  document.getElementById('boomBtn').textContent = 'Go back and beat it →';
+  document.getElementById('boomBtn').onclick = ()=>{
+    document.getElementById('boomOverlay').classList.remove('show');
+  };
+}
+
+function showPaywallBoom(){
+  document.getElementById('boomBig').textContent='🌞';
+  document.getElementById('boomTitle').textContent='You\'ve got the basics!';
+  document.getElementById('boomBelt').textContent='';
+  document.getElementById('boomSub').textContent='Arrivals, Hotel, In Case — you can handle it. Ready for the bars, beach, and everything else?';
+  document.getElementById('boomOverlay').classList.add('show');
+  toneWin();confetti();
+  document.getElementById('boomBtn').textContent='Unlock everything →';
+  document.getElementById('boomBtn').onclick=()=>{document.getElementById('boomOverlay').classList.remove('show');setTimeout(openPayModal,300);};
+}
+
+function showView(id){
+  document.getElementById('home-view').style.display=id==='home-view'?'flex':'none';
+  document.getElementById('game-view').style.display=id==='game-view'?'block':'none';
+  document.getElementById('results-view').style.display=id==='results-view'?'block':'none';
+}
+
+renderHome();
+showView('home-view');
+</script>
+</body>
+</html>
