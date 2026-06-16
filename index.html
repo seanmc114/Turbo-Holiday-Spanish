@@ -7,6 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Hola Turbo">
 <meta name="theme-color" content="#e07b00">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Hola Turbo ☀️</title>
 <style>
 :root{
@@ -296,11 +298,11 @@ body{background:var(--sand);color:var(--ink);font-family:var(--font-body);oversc
           <div class="r-stat" id="rPenBox" style="display:none"><span class="r-stat-val pen" id="rPen"></span><span class="r-stat-label">penalty</span></div>
         </div>
         <div class="r-note" id="rNote"></div>
-        <button class="btn-primary" id="rAgain">🔄 Again</button>
+        <button class="btn-primary" id="rAgain">Go Again?</button>
         <button class="btn-ghost" id="rHome">← Levels</button>
         <div class="review-box" id="reviewBox" style="display:none">
           <div class="review-head">
-            <h3>Your 10 phrases</h3>
+            <h3 id="reviewTitle">Your 10 phrases</h3>
             <p>🟢 got it · 🔴 learn it</p>
           </div>
           <div id="reviewList"></div>
@@ -713,6 +715,7 @@ const TOPICS=[
   {id:'transporte',  emoji:'🚌', name:'Getting Around',stripe:'linear-gradient(90deg,#1a47b8,#4ab8f5)', free:false, beltOnSayIt:'turbo'},
   {id:'noche',       emoji:'🌙', name:'Nights Out',    stripe:'linear-gradient(90deg,#1a47b8,#c94f2c)', free:false, beltOnSayIt:'master'},
 ];
+const EL_JEFE_TOPIC={id:'eljefe',emoji:'🇪🇸',name:'El Jefe',stripe:'linear-gradient(90deg,#1a47b8,#e07b00,#c94f2c)',free:false};
 
 // Build a level object for a topic + level number (1-8) + proveit
 function buildLevelId(topicId, lvlNum){ return topicId+'_'+lvlNum; }
@@ -741,9 +744,15 @@ function getPhrasesForLevel(topicId, lvlNum, strictTier){
 
 const PAID_CHIPS=['🍺 Bars','🍽️ Restaurant','🏖️ Beach','🛍️ Shopping','🚌 Transport','🌙 Nights Out','🔥 Prove It levels for all topics'];
 
-// Par times: level 1=180s down to level 8=100s, Prove It=120s
-function parForLevel(lvlNum){ return Math.round(180 - (lvlNum-1)*10); }
-const SAY_IT_PAR=120;
+// Par times: boiling frog — slow squeeze, avg 6s drop per level
+const PAR_TIMES = [90, 87, 83, 78, 72, 65, 57, 48];
+function parForLevel(lvlNum){ return PAR_TIMES[lvlNum-1] || 48; }
+// Say It par reduces across topics as player progresses through the game
+const SAY_IT_PARS = [150,140,130,120,110,100,90,80,70];
+function getSayItPar(topicId){
+  const idx = TOPICS.findIndex(t=>t.id===topicId);
+  return SAY_IT_PARS[idx>=0?idx:0];
+}
 
 // ═══════════════════════════════════════════════
 // STORAGE
@@ -790,8 +799,7 @@ function confetti(){const cols=['#f5a623','#4ab8f5','#22c55e','#e03c2c','#1a47b8
 
 // Star thresholds — 5 stars
 // 5★ fluent under pressure, 4★ good, 3★ know it, 2★ trying, 1★ showed up
-function starsForTime(time, lvlNum, isProveIt){
-  const par = isProveIt ? 120 : parForLevel(lvlNum);
+function starsForTime(time, par){
   if(time <= par * 0.55) return 5;
   if(time <= par * 0.70) return 4;
   if(time <= par * 0.85) return 3;
@@ -822,6 +830,10 @@ function isLevelUnlocked(topicId, lvlNum){
   // proveit (9) unlocked if level 8 done
   if(lvlNum>=9) return getUnlockedLevel(topicId)>=8;
   return getUnlockedLevel(topicId)>=lvlNum;
+}
+function isElJefeUnlocked(){
+  const best=getBest(buildSayItId('noche'));
+  return best>0&&best<=getSayItPar('noche');
 }
 
 // ═══════════════════════════════════════════════
@@ -889,13 +901,14 @@ function renderHome(){
     // Prove It level
     const sayItId=buildSayItId(topic.id);
     const sayItBest=getBest(sayItId);
-    const sayItBeatPar=sayItBest>0&&sayItBest<=SAY_IT_PAR;
+    const sayItPar=getSayItPar(topic.id);
+    const sayItBeatPar=sayItBest>0&&sayItBest<=sayItPar;
     const sayCard=makeCard({
       id:sayItId, topic, unlocked,
       name:'Prove It',
       sub:'Type or speak — prove it',
       stripe:topic.stripe,
-      best:sayItBest, par:SAY_IT_PAR, beatPar:sayItBeatPar,
+      best:sayItBest, par:sayItPar, beatPar:sayItBeatPar,
       cta:'Prove It →',
       isProveIt:true,
       lvlNum:9
@@ -910,6 +923,43 @@ function renderHome(){
       }
     }
   });
+
+  // El Jefe — Boss Level
+  const elJefePar=180;
+  const elJefeBest=getBest('eljefe');
+  const elJefeBeatPar=elJefeBest>0&&elJefeBest<=elJefePar;
+  const elJefeAccess=isPaid();
+  const elJefeReady=isElJefeUnlocked();
+  const elJefeCard=document.createElement('button');
+  elJefeCard.className='level-card proveit-card'+(elJefeAccess&&elJefeReady?'':' locked');
+  const ejStars=elJefeBest>0?starsForTime(elJefeBest,elJefePar):0;
+  const ejBestHtml=elJefeBest>0
+    ?`${starsHtml(ejStars)}<span class="card-best">⏱ ${fmt(elJefeBest)}</span><span class="card-par${elJefeBeatPar?' beat':''}">par ${elJefePar}s</span>`
+    :`<span class="card-par">par ${elJefePar}s</span>`;
+  elJefeCard.innerHTML=`
+    <div class="card-stripe" style="background:${EL_JEFE_TOPIC.stripe}"></div>
+    <div class="card-body">
+      <div class="card-emoji">👑</div>
+      <div class="card-info">
+        <div class="card-name">El Jefe</div>
+        <div class="card-sub">All topics · All phrases · One shot</div>
+        <div class="card-meta">${elJefeAccess&&elJefeReady?ejBestHtml:elJefeAccess?'<span style="font-size:0.65rem;color:var(--muted);font-weight:800;">Beat Nights Out Prove It to unlock</span>':'<span style="font-size:0.65rem;color:var(--muted);font-weight:800;">Unlock full game to access</span>'}</div>
+      </div>
+      <div class="card-right"><div class="card-cta">${elJefeAccess&&elJefeReady?'El Jefe →':elJefeAccess?'🔒':'💳'}</div></div>
+    </div>`;
+  elJefeCard.onclick=elJefeAccess&&elJefeReady
+    ?()=>startLevel({id:'eljefe',topic:EL_JEFE_TOPIC,isProveIt:true,isElJefe:true,lvlNum:10,par:elJefePar})
+    :elJefeAccess?()=>{
+      document.getElementById('boomBig').textContent='🔒';
+      document.getElementById('boomTitle').textContent='Not yet!';
+      document.getElementById('boomBelt').textContent='';
+      document.getElementById('boomSub').textContent='Beat the Nights Out Prove It within par to unlock El Jefe.';
+      document.getElementById('boomOverlay').classList.add('show');
+      document.getElementById('boomBtn').textContent='Got it →';
+      document.getElementById('boomBtn').onclick=()=>document.getElementById('boomOverlay').classList.remove('show');
+    }
+    :()=>openPayModal();
+  wrap.appendChild(elJefeCard);
 
   // Paywall at bottom
   const pwWrap=document.createElement('div');
@@ -933,7 +983,7 @@ function makeCard({id,topic,unlocked,name,sub,stripe,best,par,beatPar,cta,isProv
   const levelUnlocked = unlocked && isLevelUnlocked(topic.id, lvlNum);
   const card=document.createElement('button');
   card.className='level-card'+(isProveIt&&!isMini?' proveit-card':'')+(levelUnlocked?'':' locked');
-  const stars = best>0 ? starsForTime(best, lvlNum, isProveIt) : 0;
+  const stars = best>0 ? starsForTime(best, par) : 0;
   const bestHtml=best>0
     ?`${starsHtml(stars)}<span class="card-best">⏱ ${fmt(best)}</span><span class="card-par${beatPar?' beat':''}">par ${par}s</span>`
     :`<span class="card-par">par ${par}s</span>`;
@@ -984,16 +1034,21 @@ const G={
 
 function startLevel(level){
   G.level=level;
-  // Mini lock in uses tier 1 only — same as early levels
-  const effectiveLvl = level.isMini ? 2 : level.lvlNum;
-  const phrases=getPhrasesForLevel(level.topic.id,effectiveLvl,level.isMini);
-  const qCount = level.isMini ? 5 : 10;
+  let phrases;
+  if(level.isElJefe){
+    // Boss level: all topics, all tiers
+    phrases=TOPICS.flatMap(t=>POOLS[t.id]||[]);
+  } else {
+    const effectiveLvl = level.isMini ? 2 : level.lvlNum;
+    phrases=getPhrasesForLevel(level.topic.id,effectiveLvl,level.isMini);
+  }
+  const qCount = level.isElJefe ? 20 : level.isMini ? 5 : 10;
   G.round=shuffle(phrases).slice(0,qCount);
   G.idx=0;G.correct=0;G.penTotal=0;G.mistakes=[];
   G.startMs=performance.now();G.accepting=true;
   clearInterval(G.timerInt);
   showView('game-view');
-  document.getElementById('gameTopic').textContent=level.topic.emoji+' '+level.topic.name+' — '+(level.isProveIt?'Prove It':'Level '+level.lvlNum);
+  document.getElementById('gameTopic').textContent=level.isElJefe?'👑 El Jefe — Boss Level':level.topic.emoji+' '+level.topic.name+' — '+(level.isProveIt?'Prove It':'Level '+level.lvlNum);
   document.getElementById('statScore').textContent='0';
   document.getElementById('backBtn').onclick=()=>{clearInterval(G.timerInt);stopMic();showView('home-view');renderHome();};
   G.timerInt=setInterval(()=>{const el=document.getElementById('statTimer');if(el){const t=((performance.now()-G.startMs)/1000)+G.penTotal;el.textContent=t.toFixed(1)+'s';}},100);
@@ -1167,12 +1222,13 @@ function finishLevel(){
     }
   }
 
-  if(isNewBest&&oldBest>0)noteEl.textContent=`⚡ ${(oldBest-total).toFixed(1)}s faster than before!`;
+  if(isNewBest&&oldBest>0)noteEl.textContent=`⚡ ${(oldBest-total).toFixed(1)}s faster — keep going!`;
   else if(beatPar)noteEl.textContent=`✓ Par beaten — next level unlocked!`;
   else if(oldBest>0&&!isNewBest)noteEl.textContent=`Best: ${fmt(oldBest)} — ${Math.ceil(oldBest-level.par)}s off par. Keep going.`;
   else noteEl.textContent=`Par is ${level.par}s — beat it to unlock the next level`;
 
-  // Review all 10
+  // Review phrases — update title for El Jefe
+  document.getElementById('reviewTitle').textContent=level.isElJefe?'Your 20 phrases':'Your 10 phrases';
   document.getElementById('reviewBox').style.display='block';
   const mistakeSet=new Set(G.mistakes.map(m=>m.en));
   document.getElementById('reviewList').innerHTML=G.round.map(q=>{
@@ -1187,6 +1243,25 @@ function finishLevel(){
   }).join('');
 
   if(G.correct===10){toneWin();confetti();}
+
+  // El Jefe special finish
+  if(level.isElJefe&&G.correct>=16){
+    setTimeout(()=>{
+      document.getElementById('boomBig').textContent='🇪🇸';
+      document.getElementById('boomTitle').textContent=beatPar?'El Jefe.':'Nearly there.';
+      document.getElementById('boomBelt').textContent='';
+      document.getElementById('boomSub').textContent=beatPar
+        ?'You\'re ready. Go to Spain.'
+        :`${G.correct}/20 — you know this. One more run.`;
+      document.getElementById('boomOverlay').classList.add('show');
+      if(beatPar){toneWin();confetti();}
+      document.getElementById('boomBtn').textContent=beatPar?'Vamos! →':'Go Again?';
+      document.getElementById('boomBtn').onclick=()=>{
+        document.getElementById('boomOverlay').classList.remove('show');
+        if(beatPar)renderHome();
+      };
+    },700);
+  }
 
   // Mini Lock In boom
   if(level.isMini && G.correct>=4){
