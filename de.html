@@ -313,6 +313,13 @@ body{background:linear-gradient(160deg,#fef6e4 0%,#fdebd0 100%);color:var(--ink)
       </div>
     </div>
     <p class="welcome-msg" id="welcomeMsg"></p>
+    <div style="display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap;" id="langSwitcher">
+      <button onclick="window.location.href='index.html'" style="background:none;border:none;font-size:1.4rem;cursor:pointer;opacity:0.5;padding:2px;" title="Spanish">🇪🇸</button>
+      <button onclick="window.location.href='fr.html'" style="background:none;border:none;font-size:1.4rem;cursor:pointer;opacity:0.5;padding:2px;" title="French">🇫🇷</button>
+      <button onclick="window.location.href='it.html'" style="background:none;border:none;font-size:1.4rem;cursor:pointer;opacity:0.5;padding:2px;" title="Italian">🇮🇹</button>
+      <button onclick="window.location.href='de.html'" style="background:none;border:none;font-size:1.4rem;cursor:pointer;opacity:0.5;padding:2px;" title="German">🇩🇪</button>
+      <button onclick="window.location.href='pt.html'" style="background:none;border:none;font-size:1.4rem;cursor:pointer;opacity:0.5;padding:2px;" title="Portuguese">🇵🇹</button>
+    </div>
   </header>
   <div class="app-scroll"><div id="levels-wrap"></div></div>
 </div>
@@ -988,7 +995,12 @@ function renderHome(){
   document.getElementById('beltTitle').textContent=belt.title;
   document.getElementById('beltBadge').style.borderLeftColor=belt.color;
 
-  // Welcome message — changes after purchase
+  // Highlight active language flag
+  const currentLang=getLang()||'es';
+  document.querySelectorAll('#langSwitcher button').forEach(b=>{
+    b.style.opacity=b.title.toLowerCase()===({es:'spanish',fr:'french',it:'italian',de:'german',pt:'portuguese'}[currentLang])?'1':'0.35';
+    b.style.transform=b.title.toLowerCase()===({es:'spanish',fr:'french',it:'italian',de:'german',pt:'portuguese'}[currentLang])?'scale(1.2)':'scale(1)';
+  });
   const wm=document.getElementById('welcomeMsg');
   if(isPaid()){
     wm.textContent='If it works — pass it on 🙏🏻';
