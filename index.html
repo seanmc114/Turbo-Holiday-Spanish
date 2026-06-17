@@ -1193,12 +1193,49 @@ function makeCard({id,topic,unlocked,name,sub,stripe,best,par,beatPar,cta,isProv
 // ═══════════════════════════════════════════════
 // PAY MODAL
 // ═══════════════════════════════════════════════
+const STRIPE_LINK='https://buy.stripe.com/14A6oAapo1W85Dy0s13gk00';
+const WORKER_URL='https://turbo-holiday.seansynge.workers.dev';
+
 function openPayModal(){
-  document.getElementById('payChips').innerHTML=PAID_CHIPS.map(c=>`<span class="pay-chip">${c}</span>`).join('');
-  document.getElementById('payOverlay').classList.add('show');
+  const returnUrl=window.location.href.split('?')[0]+'?session={CHECKOUT_SESSION_ID}';
+  window.location.href=STRIPE_LINK+'?success_url='+encodeURIComponent(returnUrl);
 }
+function doPurchase(){openPayModal();}
+
+// Handle return from Stripe — verify session with Worker
+(function checkPayReturn(){
+  const params=new URLSearchParams(window.location.search);
+  const sessionId=params.get('session');
+  if(sessionId&&sessionId.startsWith('cs_')){
+    window.history.replaceState({},'',window.location.pathname);
+    fetch(WORKER_URL+'/verify',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({session_id:sessionId})
+    })
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.ok){
+        lsSet('paid','1');
+        showView('home-view');
+        renderHome();
+        // Small celebration
+        document.getElementById('boomBig').textContent='🎉';
+        document.getElementById('boomTitle').textContent='Unlocked!';
+        document.getElementById('boomBelt').textContent='';
+        document.getElementById('boomSub').textContent='The full trip is yours. Go on ya!';
+        document.getElementById('boomOverlay').classList.add('show');
+        document.getElementById('boomBtn').textContent='Let\'s go →';
+        document.getElementById('boomBtn').onclick=()=>{document.getElementById('boomOverlay').classList.remove('show');renderHome();};
+      }
+    })
+    .catch(()=>{
+      // Fallback — if Worker unreachable, trust the redirect for now
+      lsSet('paid','1');
+    });
+  }
+})();
 function closePayModal(){document.getElementById('payOverlay').classList.remove('show');}
-function doPurchase(){alert('Coming to App Store and Google Play soon!');closePayModal();}
 document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('payOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('payOverlay'))closePayModal();});
   document.getElementById('tsInput').addEventListener('keydown',e=>{if(e.key==='Enter')submitTyped();});
