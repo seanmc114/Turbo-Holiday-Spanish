@@ -258,10 +258,18 @@ body{background:linear-gradient(160deg,#fef6e4 0%,#fdebd0 100%);color:var(--ink)
       </svg>
     </div>
     <h1 class="setup-title">Turbo Holiday</h1>
-    <p class="setup-sub">Pronti per le vacanze?</p>
+    <p class="setup-sub">Practice in private. Shine in public.</p>
 
-    <button class="setup-go" id="setupGo">Let's go →</button>
-    <p class="setup-fine">3 free levels · €0.99 for everything · Pass it on 🙏🏻</p>
+    <div class="setup-section">
+      <div class="setup-label">Where are you going?</div>
+      <div class="lang-grid">
+        <button class="lang-btn" onclick="window.location.href='index.html?lang=es'">🇪🇸<span>Spanish</span></button>
+        <button class="lang-btn" onclick="window.location.href='fr.html'">🇫🇷<span>French</span></button>
+        <button class="lang-btn" onclick="window.location.href='it.html'">🇮🇹<span>Italian</span></button>
+        <button class="lang-btn" onclick="window.location.href='de.html'">🇩🇪<span>German</span></button>
+        <button class="lang-btn" onclick="window.location.href='pt.html'">🇵🇹<span>Portuguese</span></button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -314,11 +322,7 @@ body{background:linear-gradient(160deg,#fef6e4 0%,#fdebd0 100%);color:var(--ink)
     </div>
     <p class="welcome-msg" id="welcomeMsg"></p>
     <div style="display:flex;justify-content:center;gap:8px;margin-top:6px;flex-wrap:wrap;" id="langSwitcher">
-      <button onclick="window.location.href='index.html'" style="background:none;border:none;font-size:1.4rem;cursor:pointer;opacity:0.5;padding:2px;" title="Spanish">🇪🇸</button>
-      <button onclick="window.location.href='fr.html'" style="background:none;border:none;font-size:1.4rem;cursor:pointer;opacity:0.5;padding:2px;" title="French">🇫🇷</button>
-      <button onclick="window.location.href='it.html'" style="background:none;border:none;font-size:1.4rem;cursor:pointer;opacity:0.5;padding:2px;" title="Italian">🇮🇹</button>
-      <button onclick="window.location.href='de.html'" style="background:none;border:none;font-size:1.4rem;cursor:pointer;opacity:0.5;padding:2px;" title="German">🇩🇪</button>
-      <button onclick="window.location.href='pt.html'" style="background:none;border:none;font-size:1.4rem;cursor:pointer;opacity:0.5;padding:2px;" title="Portuguese">🇵🇹</button>
+      <button onclick="window.location.href='index.html'" style="background:none;border:none;font-size:1.1rem;cursor:pointer;padding:2px;" title="Change language">🌍 Change language</button>
     </div>
   </header>
   <div class="app-scroll"><div id="levels-wrap"></div></div>
@@ -871,6 +875,7 @@ function offerUpgrade(currentDiff){
 }
 lsSet('lang','it');
 function getDifficulty(){return lsGet('difficulty')||'holiday';}
+lsSet('lang','es'); // force Spanish in index.html
 function setDifficulty(d){lsSet('difficulty',d);}
 function getLang(){return lsGet('lang')||'es';}
 function setLang(l){lsSet('lang',l);}
@@ -886,31 +891,8 @@ function isSetupDone(){return lsGet('setup_done_it')==='1';}
 function markSetupDone(){lsSet('setup_done_it','1');}
 
 function initSetup(){
-  if(isSetupDone()){showView('home-view');renderHome();return;}
-  showView('setup-view');
-  setDifficulty('holiday'); // everyone starts on Holiday — game earns the upgrade
-
-  let chosenLang=getLang()||'es';
-
-  document.querySelectorAll('.lang-btn').forEach(b=>{
-    if(b.dataset.lang===chosenLang) b.classList.add('active');
-    b.onclick=()=>{
-      chosenLang=b.dataset.lang;
-      document.querySelectorAll('.lang-btn').forEach(x=>x.classList.remove('active'));
-      b.classList.add('active');
-    };
-  });
-
-  document.getElementById('setupGo').onclick=()=>{
-    setLang(chosenLang);
-    markSetupDone();
-    if(chosenLang==='fr'){window.location.href='fr.html';return;}
-    if(chosenLang==='de'){window.location.href='de.html';return;}
-    if(chosenLang==='it'){window.location.href='it.html';return;}
-    if(chosenLang==='pt'){window.location.href='pt.html';return;}
-    showView('home-view');
-    renderHome();
-  };
+  showView('home-view');
+  renderHome();
 }
 
 // ═══════════════════════════════════════════════
