@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Turbo Holiday">
+<meta name="apple-mobile-web-app-title" content="TurboLingo">
 <meta name="theme-color" content="#c60b1e">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
-<title>Turbo Holiday ☀️</title>
+<title>TurboLingo ☀️</title>
 <style>
 :root{
   --sun:#f5a623;--sun-deep:#c60b1e;--terra:#9b0817;--sky:#4ab8f5;
@@ -257,7 +257,7 @@ body{background:linear-gradient(160deg,#fef6e4 0%,#fdebd0 100%);color:var(--ink)
         <text x="44" y="80" font-family="'Arial Black','Impact','Arial Bold',sans-serif" font-size="50" font-weight="900" font-style="italic" fill="#c60b1e" filter="url(#spray2)" letter-spacing="-2">TURBO</text>
       </svg>
     </div>
-    <h1 class="setup-title">Turbo Holiday</h1>
+    <h1 class="setup-title">TurboLingo</h1>
     <p class="setup-sub">Practice in private. Shine in public.</p>
 
     <div class="setup-section">
@@ -392,7 +392,7 @@ body{background:linear-gradient(160deg,#fef6e4 0%,#fdebd0 100%);color:var(--ink)
         </div>
       </div>
     </div>
-    <div class="footer-copy">Turbo Holiday · Imagination and Perseverance · © 2026</div>
+    <div class="footer-copy">TurboLingo · Imagination and Perseverance · © 2026</div>
   </div>
 </div>
 
@@ -789,7 +789,7 @@ const BELTS=[
   {id:'novice', emoji:'🌱', title:'Holiday Novice',     color:'#7a6a58', unlockedBy:null},
   {id:'seeker', emoji:'🌞', title:'Sun Seeker',         color:'#f5a623', unlockedBy:'arrivals_proveit'},
   {id:'local',  emoji:'🍺', title:'The Local',          color:'#22c55e', unlockedBy:'bar_proveit'},
-  {id:'turbo',  emoji:'🔥', title:'Turbo Holidaymaker', color:'#c60b1e', unlockedBy:'transporte_proveit'},
+  {id:'turbo',  emoji:'🔥', title:'TurboLingo', color:'#c60b1e', unlockedBy:'transporte_proveit'},
   {id:'master', emoji:'🏆', title:'Holiday Master',     color:'#1a47b8', unlockedBy:'noche_proveit'},
 ];
 
@@ -844,8 +844,7 @@ const PAID_CHIPS=['🍺 Bars','🍽️ Restaurant','🏖️ Beach','🛍️ Shop
 
 // Par times: boiling frog — slow squeeze, avg 6s drop per level (10 levels)
 const PAR_TIMES = [90, 87, 83, 78, 72, 65, 57, 48, 41, 35];
-function parForLevel(lvlNum){ return Math.round((PAR_TIMES[lvlNum-1]||35)*parMultiplier()); }
-// Say It par reduces across topics as player progresses through the game
+function parForLevel(lvlNum){ return Math.max(38, Math.round((PAR_TIMES[lvlNum-1]||38)*parMultiplier())); }// Say It par reduces across topics as player progresses through the game
 const SAY_IT_PARS = [150,140,130,120,110,100,90,80,70];
 function getSayItPar(topicId){
   const idx = TOPICS.findIndex(t=>t.id===topicId);
@@ -866,17 +865,17 @@ function setDiffStreak(n){lsSet('diff_streak',String(n));}
 
 function checkDiffUpgrade(total, par){
   const diff = getDifficulty();
-  if(diff==='loco') return; // already at the top
+  if(diff==='loco') return;
   const pct = (par - total) / par;
-  if(pct >= 0.35){ // dominant run — 35%+ under par
+  if(pct >= 0.40){ // dominant — 40%+ under par
     const streak = getDiffStreak() + 1;
     setDiffStreak(streak);
-    if(streak >= 3){
+    if(streak >= 7){ // 7 consecutive dominant runs needed
       setDiffStreak(0);
       offerUpgrade(diff);
     }
   } else {
-    setDiffStreak(0); // reset — must be consistent
+    setDiffStreak(0);
   }
 }
 
@@ -884,18 +883,18 @@ function offerUpgrade(currentDiff){
   const next = currentDiff==='holiday' ? 'turbo' : 'loco';
   const nextName = next==='turbo' ? 'Turbo 🔵' : 'Loco 🔴';
   const msgs = [
-    `You're flying it. Moving you up to ${nextName}. Go on ya! 🚀`,
-    `Three in a row. The game noticed. Welcome to ${nextName}. 🎯`,
-    `Look at ya. Earned yourself ${nextName}. Keep going! ⚡`,
+    `You've dominated 7 levels in a row — the game is stepping up to ${nextName}. Par times will be tighter. You earned it.`,
+    `Seven dominant runs. The game noticed. Moving you to ${nextName} — same game, higher standard.`,
+    `Good on you — consistently flying it. ${nextName} from here. The pars get tighter but you can handle it.`,
   ];
   setTimeout(()=>{
     document.getElementById('boomBig').textContent='⬆️';
-    document.getElementById('boomTitle').textContent='Level Up!';
+    document.getElementById('boomTitle').textContent='Stepping Up!';
     document.getElementById('boomBelt').textContent=nextName;
     document.getElementById('boomSub').textContent=pick(msgs);
     document.getElementById('boomOverlay').classList.add('show');
     toneWin(); confetti();
-    document.getElementById('boomBtn').textContent='Let\'s go! →';
+    document.getElementById('boomBtn').textContent='Let\'s go →';
     document.getElementById('boomBtn').onclick=()=>{
       setDifficulty(next);
       document.getElementById('boomOverlay').classList.remove('show');
@@ -913,9 +912,10 @@ function isTopicUnlocked(topic){return topic.free||isPaid();}
 function parMultiplier(){
   const d=getDifficulty();
   if(d==='holiday') return 1.3;
-  if(d==='loco') return 0.7;
+  if(d==='loco') return 0.85;
   return 1.0;
 }
+function parForLevel(lvlNum){ return Math.max(38, Math.round((PAR_TIMES[lvlNum-1]||38)*parMultiplier())); }
 function isSetupDone(){return lsGet('setup_done')==='1';}
 function markSetupDone(){lsSet('setup_done','1');}
 
@@ -1174,7 +1174,7 @@ function renderHome(){
 
   const ft=document.createElement('div');
   ft.className='footer-copy';
-  ft.textContent='Turbo Holiday · Imagination and Perseverance · © 2026';
+  ft.textContent='TurboLingo · Imagination and Perseverance · © 2026';
   wrap.appendChild(ft);
 }
 
@@ -1211,7 +1211,7 @@ function makeCard({id,topic,unlocked,name,sub,stripe,best,par,beatPar,cta,isProv
 // PAY MODAL
 // ═══════════════════════════════════════════════
 const STRIPE_LINK='https://buy.stripe.com/14A6oAapo1W85Dy0s13gk00';
-const WORKER_URL='https://turbo-holiday.seansynge.workers.dev';
+const WORKER_URL='https://shrill-snowflake-cc97.seansynge.workers.dev';
 
 function openPayModal(){
   const returnUrl=window.location.href.split('?')[0]+'?session={CHECKOUT_SESSION_ID}';
@@ -1240,7 +1240,7 @@ function doPurchase(){openPayModal();}
         document.getElementById('boomBig').textContent='🎉';
         document.getElementById('boomTitle').textContent='Unlocked!';
         document.getElementById('boomBelt').textContent='';
-        document.getElementById('boomSub').textContent='The full trip is yours. Go on ya!';
+        document.getElementById('boomSub').textContent='The full trip is yours. Good on ya!';
         document.getElementById('boomOverlay').classList.add('show');
         document.getElementById('boomBtn').textContent='Let\'s go →';
         document.getElementById('boomBtn').onclick=()=>{document.getElementById('boomOverlay').classList.remove('show');renderHome();};
@@ -1491,7 +1491,7 @@ function stopMic(){if(G.recog){try{G.recog.stop();}catch(e){}G.recog=null;}G.lis
 // ═══════════════════════════════════════════════
 function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 const MSG_CORRECT=[
-  '✔ Deadly!','✔ Go on ya!','✔ That\'s the one!','✔ Spot on!',
+  '✔ Deadly!','✔ Good on ya!','✔ That\'s the one!','✔ Spot on!',
   '✔ Sure you know it!','✔ Nice one!','✔ ¡Sí!',
   '✔ You\'re flying it!','✔ Perfecto!','✔ That\'s it!',
 ];
@@ -1501,10 +1501,10 @@ const MSG_WRONG_SHORT=[
 ];
 const MSG_PERFECT_TITLE=[
   'Perfect!','Flying it!','Deadly!','Flawless!',
-  'The absolute business!','Go on ya!',
+  'The absolute business!','Good on ya!',
 ];
 const MSG_PAR_BEATEN=[
-  '✓ Go on ya! Par beaten — next level open.',
+  '✓ Good on ya! Par beaten — next level open.',
   '✓ That\'s the stuff! Par beaten — keep going.',
   '✓ Look at ya! Par beaten — next level\'s yours.',
   '✓ Deadly! Par beaten — next one\'s unlocked.',
@@ -1513,7 +1513,7 @@ const MSG_PAR_BEATEN=[
 const MSG_FASTER=[
   `⚡ {n}s faster — you\'re flying it. Go again.`,
   `⚡ {n}s faster — deadly! One more.`,
-  `⚡ {n}s faster — go on ya good thing!`,
+  `⚡ {n}s faster — go on you!!`,
   `⚡ {n}s faster — sure look at that. Keep going.`,
   `⚡ {n}s faster — that\'s the stuff. Go again.`,
 ];
@@ -1642,7 +1642,7 @@ function finishLevel(){
           showView('home-view'); renderHome();
         };
       };
-      document.getElementById('rAgain').textContent='Continue →';
+      document.getElementById('rAgain').textContent='Try again →';
       document.getElementById('rAgain').onclick=()=>showMiniBoom();
       document.getElementById('rHome').onclick=()=>showMiniBoom();
     } else {
